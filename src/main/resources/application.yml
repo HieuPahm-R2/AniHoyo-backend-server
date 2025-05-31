@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    username: root
+    password: 12102005
+    url: jdbc:mysql://localhost:3306/anihoyo
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql:true
+  application:
+    name: AniHoyo
+anihoyo:
+  jwt:
+    base64-secret: qoAEABDke07+AVLepXB4aCMtsT0wMAqR5x2VFyldsnx6e75YQkJH2UcZKTjEyoNgG71SBCXfq5N6NVZxWOfsHQ==
+    access-token-validity-in-seconds: 864000
+    refresh-token-validity-in-seconds: 8640000
+server:
+  port: 8083
+
+
