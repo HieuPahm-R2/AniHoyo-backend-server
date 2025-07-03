@@ -8,10 +8,13 @@ spring:
       ddl-auto: update
     show-sql: true
     properties:
-      hibernate:
-        format_sql:true
+      hibernate: format_sql:true
   application:
     name: AniHoyo
+  servlet:
+    multipart:
+      max-file-size: 1000MB
+      max-request-size: 1000MB
 anihoyo:
   jwt:
     base64-secret: qoAEABDke07+AVLepXB4aCMtsT0wMAqR5x2VFyldsnx6e75YQkJH2UcZKTjEyoNgG71SBCXfq5N6NVZxWOfsHQ==
@@ -19,5 +22,5 @@ anihoyo:
     refresh-token-validity-in-seconds: 8640000
 server:
   port: 8083
-
-
+files:
+  video: videos/

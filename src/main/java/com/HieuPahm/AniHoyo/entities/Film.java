@@ -29,7 +29,9 @@ public class Film {
     private String thumbnail;
     @Column(columnDefinition = "nvarchar(4000)")
     private String description;
+
     private int releaseYear;
+
     private boolean status;
 
     private Instant uploadDate;
