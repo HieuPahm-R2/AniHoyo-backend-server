@@ -24,3 +24,7 @@ server:
   port: 8083
 files:
   video: videos/
+#config upload file
+hieupham:
+  upload-file:
+    base-uri: file:///D:/WhatWeDone-Will/AniHoyo-ReactSpring-restfulService/storage/

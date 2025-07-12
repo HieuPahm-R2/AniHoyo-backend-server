@@ -25,6 +25,8 @@ public class Film {
     private long id;
     @Column(columnDefinition = "nvarchar(150)")
     private String name;
+    @Column(columnDefinition = "nvarchar(150)")
+    private String studio;
     @Column(columnDefinition = "nvarchar(4000)")
     private String thumbnail;
     @Column(columnDefinition = "nvarchar(4000)")
