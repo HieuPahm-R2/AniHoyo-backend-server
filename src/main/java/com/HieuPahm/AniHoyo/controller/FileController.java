@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.HieuPahm.AniHoyo.dtos.ResUpFileDTO;
-import com.HieuPahm.AniHoyo.services.FileService;
+import com.HieuPahm.AniHoyo.services.IFileService;
 import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
 import com.HieuPahm.AniHoyo.utils.error.StorageException;
 
@@ -25,11 +25,11 @@ public class FileController {
     @Value("${hieupham.upload-file.base-uri}")
     private String baseURI;
 
-    private final FileService fileService;
-    public FileController(FileService fileService){
+    private final IFileService fileService;
+    public FileController(IFileService fileService){
         this.fileService = fileService;
     }
-     @PostMapping("/files")
+    @PostMapping("/files")
     @MessageApi("Upload Single file")
     public ResponseEntity<ResUpFileDTO> uploadData(
         @RequestParam(name = "file", required = false) MultipartFile file,

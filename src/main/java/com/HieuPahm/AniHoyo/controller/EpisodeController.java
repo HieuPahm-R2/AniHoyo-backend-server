@@ -2,7 +2,7 @@ package com.HieuPahm.AniHoyo.controller;
 
 import com.HieuPahm.AniHoyo.entities.Episode;
 import com.HieuPahm.AniHoyo.playload.CustomMessage;
-import com.HieuPahm.AniHoyo.services.EpisodeService;
+import com.HieuPahm.AniHoyo.services.IEpisodeService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -18,8 +18,8 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/episodes")
 public class EpisodeController {
-    private final EpisodeService episodeService;
-    public EpisodeController( EpisodeService episodeService){
+    private final IEpisodeService episodeService;
+    public EpisodeController( IEpisodeService episodeService){
         this.episodeService = episodeService;
     }
     @PostMapping("")

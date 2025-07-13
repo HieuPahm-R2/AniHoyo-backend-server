@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 
 import com.HieuPahm.AniHoyo.entities.User;
 import com.HieuPahm.AniHoyo.repository.UserRepository;
-import com.HieuPahm.AniHoyo.services.UserService;
+import com.HieuPahm.AniHoyo.services.IUserService;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements IUserService {
     
     private final UserRepository userRepository;
     public UserServiceImpl(UserRepository userRepository){

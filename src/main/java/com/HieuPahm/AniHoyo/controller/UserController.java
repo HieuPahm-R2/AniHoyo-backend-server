@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.HieuPahm.AniHoyo.dtos.ResUserDTO;
 import com.HieuPahm.AniHoyo.entities.User;
-import com.HieuPahm.AniHoyo.services.UserService;
+import com.HieuPahm.AniHoyo.services.IUserService;
 import com.HieuPahm.AniHoyo.services.implement.UserServiceImpl;
 import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
 import com.HieuPahm.AniHoyo.utils.error.BadActionException;

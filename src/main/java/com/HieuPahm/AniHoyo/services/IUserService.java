@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.HieuPahm.AniHoyo.entities.User;
 
-public interface UserService<T,K> {
+public interface IUserService<T,K> {
     public T create(User data);
     public T getById(K id);
     public List<T> getAll();

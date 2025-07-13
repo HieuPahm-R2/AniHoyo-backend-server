@@ -5,7 +5,7 @@ import java.net.URISyntaxException;
 
 import org.springframework.web.multipart.MultipartFile;
 
-public interface FileService {
+public interface IFileService extends ICrudService<F> {
     //create new folder if not exists folder before
     void createFolder(String folderName) throws URISyntaxException;
     // store data

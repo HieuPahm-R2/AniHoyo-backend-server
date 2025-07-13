@@ -9,12 +9,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import org.springframework.security.core.userdetails.User;
-import com.HieuPahm.AniHoyo.services.UserService;
+import com.HieuPahm.AniHoyo.services.IUserService;
 
 @Component("userDetailsService")
 public class UserDetailsConfig implements UserDetailsService{
-    private final UserService userService;
-    public UserDetailsConfig(UserService userService){
+    private final IUserService userService;
+    public UserDetailsConfig(IUserService userService){
         this.userService = userService;
     }
     @Override

@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.HieuPahm.AniHoyo.services.FileService;
+import com.HieuPahm.AniHoyo.services.IFileService;
 
 @Service
-public class FileServiceImpl implements FileService {
+public class FileServiceImpl implements IFileService {
     @Value("${hieupham.upload-file.base-uri}")
     private String baseURI;
     @Override

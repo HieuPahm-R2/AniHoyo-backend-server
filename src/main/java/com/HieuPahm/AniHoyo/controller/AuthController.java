@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.HieuPahm.AniHoyo.dtos.LoginDTO;
 import com.HieuPahm.AniHoyo.dtos.ResLoginDTO;
-import com.HieuPahm.AniHoyo.services.UserService;
+import com.HieuPahm.AniHoyo.services.IUserService;
 import com.HieuPahm.AniHoyo.utils.SecurityUtils;
 
 import jakarta.validation.Valid;
@@ -21,13 +21,13 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/v1")
 public class AuthController {
-    private final UserService userService;
+    private final IUserService userService;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final PasswordEncoder passwordEncoder;
     private final SecurityUtils securityUtils;
     
     public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder,
-                UserService userService,PasswordEncoder passwordEncoder,SecurityUtils securityUtils){
+                IUserService userService,PasswordEncoder passwordEncoder,SecurityUtils securityUtils){
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;

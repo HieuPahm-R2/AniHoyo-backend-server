@@ -2,7 +2,7 @@ package com.HieuPahm.AniHoyo.services.implement;
 
 import com.HieuPahm.AniHoyo.entities.Episode;
 import com.HieuPahm.AniHoyo.repository.EpisodeRepository;
-import com.HieuPahm.AniHoyo.services.EpisodeService;
+import com.HieuPahm.AniHoyo.services.IEpisodeService;
 
 import jakarta.annotation.PostConstruct;
 
@@ -20,7 +20,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 @Service
-public class EpisodeServiceImpl implements EpisodeService {
+public class EpisodeServiceImpl implements IEpisodeService {
 
     private final EpisodeRepository episodeRepository;
     public EpisodeServiceImpl(EpisodeRepository episodeRepository){
