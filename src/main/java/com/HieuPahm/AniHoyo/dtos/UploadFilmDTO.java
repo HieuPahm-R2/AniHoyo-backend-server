@@ -2,7 +2,6 @@ package com.HieuPahm.AniHoyo.dtos;
 
 import java.time.Instant;
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UploadFilmDTO {
-     private long id;
+    private long id;
     
     private String name;
    

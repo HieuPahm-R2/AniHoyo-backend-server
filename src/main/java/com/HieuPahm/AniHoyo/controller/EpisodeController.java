@@ -24,11 +24,9 @@ public class EpisodeController {
     }
     @PostMapping("")
     public ResponseEntity<?> createEpisode(
-            @RequestParam("file")MultipartFile file, @RequestParam("title") String title,
-            @RequestParam("description") String description){
+            @RequestParam("file")MultipartFile file, @RequestParam("title") String title){
         Episode ep = new Episode();
         ep.setTitle(title);
-        ep.setDescription(description);
         ep.setId(UUID.randomUUID().toString());
         Episode savedEpisode = episodeService.saveVideo(ep,file);
         if(savedEpisode != null){

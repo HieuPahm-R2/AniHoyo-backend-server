@@ -39,7 +39,7 @@ public class FileController {
                 throw new StorageException("Not leave blank, Please upload!!");
             }
             String fileName = file.getOriginalFilename();
-            List<String> extensionsAllowed = Arrays.asList("pdf", "jpeg", "png","doc","docx", "jpg");
+            List<String> extensionsAllowed = Arrays.asList("pdf", "jpeg", "png","webp", "jpg");
             boolean isValid = extensionsAllowed.stream().anyMatch(item -> fileName.toLowerCase().endsWith(item));
             if(!isValid){
                 throw new StorageException("Invalid file format, Please try again!");

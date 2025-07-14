@@ -1,12 +1,17 @@
 package com.HieuPahm.AniHoyo.entities;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,4 +44,8 @@ public class Film {
     private Instant uploadDate;
     private Instant updatedTime;
     
+    @ManyToMany
+    private Set<Category> categories = new HashSet<>();
+    @OneToMany(mappedBy = "film")
+    private List<Season> seasons;
 }

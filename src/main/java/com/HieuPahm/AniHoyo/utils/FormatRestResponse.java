@@ -16,7 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @ControllerAdvice
 public class FormatRestResponse implements ResponseBodyAdvice<Object> {
-     @Override
+    @Override
     public boolean supports(MethodParameter returnType, Class converterType) {
         return true;
     }
