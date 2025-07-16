@@ -27,6 +27,7 @@ public class Season {
     @GeneratedValue(strategy =  GenerationType.IDENTITY)
     private long id;
     private String seasonName;
+    private String thumb;
     private Integer releaseYear;
     private Instant uploadDate;
     private Boolean status;

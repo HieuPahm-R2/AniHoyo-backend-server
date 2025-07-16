@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class SeasonDTO {
     private Long id;
     private String SeasonName;
+    private String thumb;
     private Integer releaseYear;
     private Boolean status;
     private Instant uploadDate;

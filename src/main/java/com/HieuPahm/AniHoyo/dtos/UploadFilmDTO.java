@@ -1,6 +1,7 @@
 package com.HieuPahm.AniHoyo.dtos;
 
 import java.time.Instant;
+import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,5 +26,7 @@ public class UploadFilmDTO {
     private boolean status;
 
     private Instant uploadDate;
-    private Instant updatedTime;
+    
+    private Set<CategoryDTO> categories;
+    private Set<TagDTO> tags;
 }

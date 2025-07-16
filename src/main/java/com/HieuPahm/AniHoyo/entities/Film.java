@@ -48,4 +48,6 @@ public class Film {
     private Set<Category> categories = new HashSet<>();
     @OneToMany(mappedBy = "film")
     private List<Season> seasons;
+    @ManyToMany
+    private Set<Tag> tags;
 }

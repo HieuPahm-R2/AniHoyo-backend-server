@@ -26,7 +26,9 @@ public class FilmDTO {
 
     private boolean status;
 
-    private Instant uploadDate;
     private Set<CategoryDTO> categories;
     private List<SeasonDTO> seasons;
+    private Set<TagDTO> tags;
+    
+    private Instant uploadDate;
 }

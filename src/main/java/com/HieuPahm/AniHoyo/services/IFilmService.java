@@ -1,9 +1,11 @@
 package com.HieuPahm.AniHoyo.services;
 
+import java.util.List;
+
 import com.HieuPahm.AniHoyo.dtos.FilmDTO;
-import com.HieuPahm.AniHoyo.dtos.UploadFilmDTO;
 
 public interface IFilmService extends ICrudService<FilmDTO,Long> {
-    UploadFilmDTO upload(UploadFilmDTO uploadFlimDTO);
-    UploadFilmDTO getFlimForUpload(Long id);
+    List<FilmDTO> getAllByCategoryId(Long id);
+    FilmDTO getFilmBySeasonId(Long id);
+
 }
