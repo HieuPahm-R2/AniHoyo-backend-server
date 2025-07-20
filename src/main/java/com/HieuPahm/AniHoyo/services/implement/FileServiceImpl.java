@@ -45,7 +45,7 @@ public class FileServiceImpl implements IFileService {
         URI uri = new URI(baseURI + folderName + "/" + finalName);
         Path path = Paths.get(uri);
         // Ensure parent directories exist
-        Files.createDirectories(path.getParent());
+        // Files.createDirectories(path.getParent());
         try (InputStream inputStream = file.getInputStream()) {
             Files.copy(inputStream, path,
             StandardCopyOption.REPLACE_EXISTING);

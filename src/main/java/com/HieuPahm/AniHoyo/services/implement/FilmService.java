@@ -3,12 +3,16 @@ package com.HieuPahm.AniHoyo.services.implement;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import com.HieuPahm.AniHoyo.dtos.CategoryDTO;
 import com.HieuPahm.AniHoyo.dtos.FilmDTO;
+import com.HieuPahm.AniHoyo.entities.Category;
 import com.HieuPahm.AniHoyo.entities.Film;
+import com.HieuPahm.AniHoyo.repository.CategoryRepository;
 import com.HieuPahm.AniHoyo.repository.FilmRepository;
 import com.HieuPahm.AniHoyo.services.IFilmService;
 
@@ -16,13 +20,21 @@ import com.HieuPahm.AniHoyo.services.IFilmService;
 public class FilmService implements IFilmService {
     private final FilmRepository filmRepository;
     private final ModelMapper modelMapper;
-    public FilmService(FilmRepository filmRepository,ModelMapper modelMapper){
+    private final CategoryRepository categoryRepository;
+    public FilmService(FilmRepository filmRepository,ModelMapper modelMapper,
+    CategoryRepository categoryRepository){
         this.filmRepository = filmRepository;
         this.modelMapper = modelMapper;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
     public FilmDTO insert(FilmDTO dto) {
+        if(dto.getCategories() != null){
+            List<Long> reqCategory = dto.getCategories().stream().map(item -> item.getId()).collect(Collectors.toList());
+            Set<CategoryDTO> mainCategory = this.categoryRepository.findByIdIn(reqCategory);
+            dto.setCategories(mainCategory);
+        }
         return modelMapper.map(
             filmRepository.save(modelMapper.map(dto, Film.class)), FilmDTO.class);
     }

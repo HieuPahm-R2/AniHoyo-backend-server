@@ -34,7 +34,7 @@ public class AuthController {
         this.securityUtils = securityUtils;
     }
 
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     public ResponseEntity<ResLoginDTO> login(@Valid @RequestBody LoginDTO loginData){
         // transfer input include username/password
           UsernamePasswordAuthenticationToken authenticationToken= new UsernamePasswordAuthenticationToken(

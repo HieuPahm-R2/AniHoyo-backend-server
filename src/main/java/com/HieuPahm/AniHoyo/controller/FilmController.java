@@ -1,10 +1,12 @@
 package com.HieuPahm.AniHoyo.controller;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.HieuPahm.AniHoyo.dtos.FilmDTO;
-import com.HieuPahm.AniHoyo.entities.Film;
+
 import com.HieuPahm.AniHoyo.repository.FilmRepository;
 import com.HieuPahm.AniHoyo.services.implement.FilmService;
 import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
@@ -41,5 +43,11 @@ public class FilmController {
         this.filmService.update(filmDTO);
         return ResponseEntity.ok("update done");
     }
-   
+   @GetMapping("/get-all-films")
+   @MessageApi("Fetch all data films")
+   public ResponseEntity<?> getAllFilms(){
+    ArrayList<FilmDTO> filmsDTO = new ArrayList<>(filmService.getAll());
+    Collections.reverse(filmsDTO);
+    return ResponseEntity.ok(filmsDTO);
+   }
 }

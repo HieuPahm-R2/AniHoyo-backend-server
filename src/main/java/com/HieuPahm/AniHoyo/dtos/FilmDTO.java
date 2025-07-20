@@ -19,6 +19,8 @@ public class FilmDTO {
     private String studio;
    
     private String thumbnail;
+
+    private String slider;
     
     private String description;
 
