@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,9 +15,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import com.turkraft.springfilter.boot.Filter;
 import com.HieuPahm.AniHoyo.dtos.FilmDTO;
-
+import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
+import com.HieuPahm.AniHoyo.entities.Film;
 import com.HieuPahm.AniHoyo.repository.FilmRepository;
 import com.HieuPahm.AniHoyo.services.implement.FilmService;
 import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
@@ -45,9 +49,7 @@ public class FilmController {
     }
    @GetMapping("/get-all-films")
    @MessageApi("Fetch all data films")
-   public ResponseEntity<?> getAllFilms(){
-    ArrayList<FilmDTO> filmsDTO = new ArrayList<>(filmService.getAll());
-    Collections.reverse(filmsDTO);
-    return ResponseEntity.ok(filmsDTO);
+   public ResponseEntity<PaginationResultDTO> getAllFilms(@Filter Specification<Film> spec, Pageable pageable){
+    return ResponseEntity.ok().body(this.filmService.getAll(spec, pageable));
    }
 }

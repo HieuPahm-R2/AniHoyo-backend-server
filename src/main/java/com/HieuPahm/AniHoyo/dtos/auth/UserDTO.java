@@ -1,4 +1,4 @@
-package com.HieuPahm.AniHoyo.dtos;
+package com.HieuPahm.AniHoyo.dtos.auth;
 
 import java.time.Instant;
 
@@ -13,12 +13,23 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class ResUserDTO {
+public class UserDTO {
     private long id;
     private String name;
     private String email;
-    private GenderEnum gender;
+    private String refreshToken;
 
     private Instant updatedTime;
     private Instant createdTime;
+
+    private RoleOfUser role;
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class RoleOfUser{
+        private long id;
+        private String name;
+    }
 }

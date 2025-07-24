@@ -48,9 +48,14 @@ public class User {
 
     private String createdBy;
     private String updatedBy;
+
+    private String refreshToken;
     
     
     // db relationship
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
     
     //===============
 

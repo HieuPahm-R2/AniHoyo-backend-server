@@ -5,9 +5,13 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.HieuPahm.AniHoyo.dtos.CategoryDTO;
+import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
 import com.HieuPahm.AniHoyo.entities.Category;
 import com.HieuPahm.AniHoyo.entities.Film;
 import com.HieuPahm.AniHoyo.repository.CategoryRepository;
@@ -44,12 +48,6 @@ public class CategoryService implements ICategoryService {
         categoryRepository.save(modelMapper.map(dto, Category.class));
     }
 
-    
-    @Override
-    public List<CategoryDTO> getAllById(Set<Long> id) {
-
-        throw new UnsupportedOperationException("Unimplemented method 'getAllById'");
-    }
 
     @Override
     public void delete(Long id) {
@@ -61,9 +59,18 @@ public class CategoryService implements ICategoryService {
     }
 
     @Override
-    public List<CategoryDTO> getAll() {
-        return categoryRepository.findAll()
-                .stream().map(item -> modelMapper.map(item, CategoryDTO.class)).toList();
+    public PaginationResultDTO getAll(Specification<Category> spec,Pageable pageable) {
+        Page<Category> pageCheck = this.categoryRepository.findAll(spec, pageable);
+        PaginationResultDTO res = new PaginationResultDTO();
+        PaginationResultDTO.Meta mt = new PaginationResultDTO.Meta();
+        mt.setPage(pageCheck.getNumber() + 1);
+        mt.setPageSize(pageCheck.getSize());
+        mt.setPages(pageCheck.getTotalPages());
+        mt.setTotal(pageCheck.getTotalElements());
+        res.setMeta(mt);
+        //remove sensitive data
+        res.setResult(pageCheck.getContent());
+        return res;
     }
     
 }

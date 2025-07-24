@@ -1,4 +1,4 @@
-package com.HieuPahm.AniHoyo.dtos;
+package com.HieuPahm.AniHoyo.dtos.auth;
 
 import lombok.Getter;
 import lombok.Setter;

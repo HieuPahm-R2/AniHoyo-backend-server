@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.HieuPahm.AniHoyo.dtos.LoginDTO;
-import com.HieuPahm.AniHoyo.dtos.ResLoginDTO;
+import com.HieuPahm.AniHoyo.dtos.auth.LoginDTO;
+import com.HieuPahm.AniHoyo.dtos.auth.ResLoginDTO;
 import com.HieuPahm.AniHoyo.services.IUserService;
 import com.HieuPahm.AniHoyo.utils.SecurityUtils;
 

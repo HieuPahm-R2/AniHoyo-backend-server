@@ -43,6 +43,8 @@ public class Role {
     private String createdBy;
     private String updatedBy;
     // ======
-    
+    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<User> users;
     
 }
