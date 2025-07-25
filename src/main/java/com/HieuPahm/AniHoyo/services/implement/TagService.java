@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
 import com.HieuPahm.AniHoyo.dtos.TagDTO;
-import com.HieuPahm.AniHoyo.entities.Film;
 import com.HieuPahm.AniHoyo.entities.Tag;
 import com.HieuPahm.AniHoyo.repository.TagRepository;
 import com.HieuPahm.AniHoyo.services.ITagService;

@@ -1,11 +1,18 @@
 package com.HieuPahm.AniHoyo.services.implement;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
+import com.HieuPahm.AniHoyo.dtos.auth.UpdateUserDTO;
 import com.HieuPahm.AniHoyo.dtos.auth.UserDTO;
 import com.HieuPahm.AniHoyo.entities.User;
 import com.HieuPahm.AniHoyo.repository.UserRepository;
@@ -44,42 +51,57 @@ public class UserService implements IUserService {
         return this.modelMapper.map(data, UserDTO.class);
     }
 
-
+     @Override
+    public UserDTO getInfo(Long id) {
+        return modelMapper.map(this.userRepository.findById(id).orElseThrow(
+            () -> new NoSuchElementException("Not Found!")
+        ),UserDTO.class);
+    }
+    public UserDTO convertToUserDTO(User user){
+        UserDTO res = new UserDTO();
+        res.setId(user.getId());
+        res.setEmail(user.getEmail());
+        res.setFullName(user.getFullName());
+        res.setCreatedTime(user.getCreatedTime());
+        return res;
+    }
     @Override
-    public void getById(Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getById'");
+    public PaginationResultDTO getAll(Specification<User> spec,Pageable pageable) {
+        Page<User> pageCheck = this.userRepository.findAll(spec, pageable);
+        PaginationResultDTO res = new PaginationResultDTO();
+        PaginationResultDTO.Meta mt = new PaginationResultDTO.Meta();
+        mt.setPage(pageCheck.getNumber() + 1);
+        mt.setPageSize(pageCheck.getSize());
+        mt.setPages(pageCheck.getTotalPages());
+        mt.setTotal(pageCheck.getTotalElements());
+        res.setMeta(mt);
+        //remove sensitive data
+        List<UserDTO> listUser = pageCheck.getContent()
+                .stream().map(item -> this.convertToUserDTO(item))
+                .collect(Collectors.toList());
+        res.setResult(listUser);
+        return res;
     }
 
 
     @Override
-    public PaginationResultDTO getAll() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAll'");
+    public void delete(Long id) throws BadActionException {
+        Optional<User> currentUser = this.userRepository.findById(id);
+        if(!currentUser.isPresent()){
+           throw new BadActionException("Not Found");
+        }
+        this.userRepository.deleteById(id);
     }
 
 
     @Override
-    public void delete(User id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
+    public UpdateUserDTO update(User data) throws BadActionException {
+        Optional<User> currentUser = this.userRepository.findById(data.getId());
+        if(!currentUser.isPresent()){
+           throw new BadActionException("Not Found");
+        }
+        currentUser.get().setFullName(data.getFullName());
+        return modelMapper.map(currentUser.get(), UpdateUserDTO.class);
     }
-
-
-    @Override
-    public void update(User data) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
-    }
-
-
-    @Override
-    public boolean CheckEmailExist(String email) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'CheckEmailExist'");
-    }
-
-   
-
     
 }

@@ -15,21 +15,11 @@ import lombok.Setter;
 @Setter
 public class UserDTO {
     private long id;
-    private String name;
+    private String fullName;
     private String email;
     private String refreshToken;
 
     private Instant updatedTime;
     private Instant createdTime;
 
-    private RoleOfUser role;
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class RoleOfUser{
-        private long id;
-        private String name;
-    }
 }
