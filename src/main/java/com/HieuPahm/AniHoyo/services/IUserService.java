@@ -1,9 +1,7 @@
 package com.HieuPahm.AniHoyo.services;
 
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-
 import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
 import com.HieuPahm.AniHoyo.dtos.auth.UpdateUserDTO;
 import com.HieuPahm.AniHoyo.dtos.auth.UserDTO;
@@ -18,5 +16,6 @@ public interface IUserService {
     public UpdateUserDTO update(User data) throws BadActionException;
 
     public UserDTO convertToUserDTO(User user);
+    public void saveRefreshToken(String token, String email);
     public User handleGetUserByUsername(String username);
 }

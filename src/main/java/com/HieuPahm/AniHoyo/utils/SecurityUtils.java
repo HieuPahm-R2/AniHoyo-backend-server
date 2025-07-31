@@ -17,6 +17,8 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
+import com.HieuPahm.AniHoyo.dtos.auth.ResLoginDTO;
+
 @Service
 public class SecurityUtils {
     public static final MacAlgorithm JWT_ALGORITHM = MacAlgorithm.HS512;
@@ -58,7 +60,6 @@ public class SecurityUtils {
     
     public String generateAccessToken(Authentication authentication){
         // assign to claim
-
         Instant now = Instant.now();
         Instant validity = now.plus(this.accessTokenExpire, ChronoUnit.SECONDS);
  
@@ -68,6 +69,24 @@ public class SecurityUtils {
         .expiresAt(validity)
         .subject(authentication.getName())
         .claim("user account", authentication)
+        .build();
+        JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
+        return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
+    }
+    public String generateRefreshToken(String emailLogin, ResLoginDTO resLoginDTO){
+        ResLoginDTO.InfoWithinToken data = new ResLoginDTO.InfoWithinToken();
+        data.setId(resLoginDTO.getUser().getId());
+        data.setEmail(resLoginDTO.getUser().getEmail());
+        data.setName(resLoginDTO.getUser().getName());
+         // assign to claim
+        Instant now = Instant.now();
+        Instant validity = now.plus(this.accessTokenExpire, ChronoUnit.SECONDS);
+        // @formatter:off
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+        .issuedAt(now)
+        .expiresAt(validity)
+        .subject(emailLogin)
+        .claim("user account", data)
         .build();
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();

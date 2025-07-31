@@ -34,13 +34,13 @@ public class UserController {
     }
 
     @PostMapping("/user-create")
-    @MessageApi("Create new User action")
+    @MessageApi("Register new account action")
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody User dataUser) throws BadActionException{
         // User accUser = this.userService.handleCreateUser(dataUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.create(dataUser));
     }
     @GetMapping("/user/{id}")
-    @MessageApi("Create new User action")
+    @MessageApi("Get information user action")
     public ResponseEntity<UserDTO> getInfo(@PathVariable("id") long id) throws BadActionException{
         // User accUser = this.userService.handleCreateUser(dataUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.getInfo(id));

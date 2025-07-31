@@ -51,7 +51,7 @@ public class UserService implements IUserService {
         return this.modelMapper.map(data, UserDTO.class);
     }
 
-     @Override
+    @Override
     public UserDTO getInfo(Long id) {
         return modelMapper.map(this.userRepository.findById(id).orElseThrow(
             () -> new NoSuchElementException("Not Found!")
@@ -102,6 +102,16 @@ public class UserService implements IUserService {
         }
         currentUser.get().setFullName(data.getFullName());
         return modelMapper.map(currentUser.get(), UpdateUserDTO.class);
+    }
+
+
+    @Override
+    public void saveRefreshToken(String token, String email) {
+       User currentUser = this.handleGetUserByUsername(email);
+       if(currentUser != null){
+            currentUser.setRefreshToken(token);
+            this.userRepository.save(currentUser);
+       }
     }
     
 }

@@ -17,6 +17,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,6 +39,7 @@ public class User {
 
     @NotBlank(message = "Email not be blank..")
     @Column(unique = true)
+    @Email(message = "Chưa đúng định dạng Email..")
     private String email;
 
     @NotBlank(message = "Password not be blank..")
