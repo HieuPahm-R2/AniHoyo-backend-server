@@ -18,17 +18,18 @@ import com.HieuPahm.AniHoyo.services.ITagService;
 
 @Service
 public class TagService implements ITagService {
-    
+
     private final ModelMapper modelMapper;
     private final TagRepository tagRepository;
-    public TagService(ModelMapper modelMapper, TagRepository tagRepository){
+
+    public TagService(ModelMapper modelMapper, TagRepository tagRepository) {
         this.tagRepository = tagRepository;
         this.modelMapper = modelMapper;
     }
 
     @Override
     public TagDTO insert(TagDTO dto) {
-       return modelMapper.map(tagRepository.save(modelMapper.map(dto, Tag.class)), TagDTO.class);
+        return modelMapper.map(tagRepository.save(modelMapper.map(dto, Tag.class)), TagDTO.class);
     }
 
     @Override
@@ -38,9 +39,8 @@ public class TagService implements ITagService {
     }
 
     @Override
-    public void update(TagDTO dto) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+    public TagDTO update(TagDTO dto) {
+        return modelMapper.map(tagRepository.save(modelMapper.map(dto, Tag.class)), TagDTO.class);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class TagService implements ITagService {
     }
 
     @Override
-    public PaginationResultDTO getAll(Specification<Tag> spec,Pageable pageable) {
+    public PaginationResultDTO getAll(Specification<Tag> spec, Pageable pageable) {
         Page<Tag> pageCheck = this.tagRepository.findAll(spec, pageable);
         PaginationResultDTO res = new PaginationResultDTO();
         PaginationResultDTO.Meta mt = new PaginationResultDTO.Meta();
@@ -59,10 +59,9 @@ public class TagService implements ITagService {
         mt.setPages(pageCheck.getTotalPages());
         mt.setTotal(pageCheck.getTotalElements());
         res.setMeta(mt);
-        //remove sensitive data
+        // remove sensitive data
         res.setResult(pageCheck.getContent());
         return res;
     }
 
-    
 }

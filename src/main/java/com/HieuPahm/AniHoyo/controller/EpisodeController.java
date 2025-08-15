@@ -5,7 +5,6 @@ import com.HieuPahm.AniHoyo.playload.CustomMessage;
 import com.HieuPahm.AniHoyo.services.IEpisodeService;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,19 +18,21 @@ import java.util.UUID;
 @RequestMapping("/api/v1/episodes")
 public class EpisodeController {
     private final IEpisodeService episodeService;
-    public EpisodeController( IEpisodeService episodeService){
+
+    public EpisodeController(IEpisodeService episodeService) {
         this.episodeService = episodeService;
     }
+
     @PostMapping("")
     public ResponseEntity<?> createEpisode(
-            @RequestParam("file")MultipartFile file, @RequestParam("title") String title){
+            @RequestParam("file") MultipartFile file, @RequestParam("title") String title) {
         Episode ep = new Episode();
         ep.setTitle(title);
         ep.setId(UUID.randomUUID().toString());
-        Episode savedEpisode = episodeService.saveVideo(ep,file);
-        if(savedEpisode != null){
+        Episode savedEpisode = episodeService.saveVideo(ep, file);
+        if (savedEpisode != null) {
             return ResponseEntity.status(HttpStatus.OK).body(ep);
-        }else{
+        } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(CustomMessage.builder().message("Can not upload video").success(false).build());
         }

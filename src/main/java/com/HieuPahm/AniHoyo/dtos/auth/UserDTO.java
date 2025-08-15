@@ -19,4 +19,14 @@ public class UserDTO {
     private Instant updatedTime;
     private Instant createdTime;
 
+    private RoleOfUser role;
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class RoleOfUser {
+        private long id;
+        private String name;
+    }
 }

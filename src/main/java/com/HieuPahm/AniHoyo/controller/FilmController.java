@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,25 +33,39 @@ import jakarta.validation.Valid;
 public class FilmController {
     private final FilmService filmService;
     private final FilmRepository filmRepository;
-    public FilmController(FilmService filmService, FilmRepository filmRepository){
+
+    public FilmController(FilmService filmService, FilmRepository filmRepository) {
         this.filmService = filmService;
         this.filmRepository = filmRepository;
     }
+
     @PostMapping("/add-film")
     @MessageApi("Add new film")
-    public ResponseEntity<?> addFilm(@RequestBody FilmDTO filmDTO ){
+    public ResponseEntity<?> addFilm(@RequestBody FilmDTO filmDTO) {
         return ResponseEntity.ok(filmService.insert(filmDTO));
     }
-     // # update task
+
+    // # update task
     @PutMapping("/update-film")
     @MessageApi("Edit film info action")
-    public ResponseEntity<?> updateJob(@Valid @RequestBody FilmDTO filmDTO) throws BadActionException{
-        this.filmService.update(filmDTO);
-        return ResponseEntity.ok("update done");
+    public ResponseEntity<?> update(@Valid @RequestBody FilmDTO filmDTO) throws BadActionException {
+        return ResponseEntity.status(HttpStatus.OK).body(this.filmService.update(filmDTO));
     }
-   @GetMapping("/get-all-films")
-   @MessageApi("Fetch all data films")
-   public ResponseEntity<PaginationResultDTO> getAllFilms(@Filter Specification<Film> spec, Pageable pageable){
-    return ResponseEntity.ok().body(this.filmService.getAll(spec, pageable));
-   }
+
+    @DeleteMapping("/delete-film/{id}")
+    @MessageApi("Delete a film")
+    public ResponseEntity<Void> delete(@PathVariable("id") long id) throws BadActionException {
+        if (this.filmRepository.findById(id).isEmpty()) {
+            throw new BadActionException("Dữ liệu cần xóa không tìm thấy!");
+        }
+        this.filmService.delete(id);
+        return ResponseEntity.ok().body(null);
+    }
+
+    @GetMapping("/all-films")
+    @MessageApi("Fetch all data films")
+    public ResponseEntity<PaginationResultDTO> getAllFilms(@Filter Specification<Film> spec, Pageable pageable) {
+        return ResponseEntity.ok().body(this.filmService.getAll(spec, pageable));
+    }
+
 }

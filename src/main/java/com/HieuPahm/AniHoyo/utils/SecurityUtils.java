@@ -4,6 +4,9 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import com.nimbusds.jose.util.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -15,6 +18,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
 
 import com.HieuPahm.AniHoyo.dtos.auth.ResLoginDTO;
@@ -32,10 +36,11 @@ public class SecurityUtils {
     @Value("${anihoyo.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpire;
 
-    public SecurityUtils(JwtEncoder jwtEncoder){
+    public SecurityUtils(JwtEncoder jwtEncoder) {
         this.jwtEncoder = jwtEncoder;
     }
-     /**
+
+    /**
      * Get the login of the current user.
      *
      * @return the login of the current user.
@@ -44,6 +49,7 @@ public class SecurityUtils {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         return Optional.ofNullable(extractPrincipal(securityContext.getAuthentication()));
     }
+
     private static String extractPrincipal(Authentication authentication) {
         if (authentication == null) {
             return null;
@@ -56,19 +62,39 @@ public class SecurityUtils {
         }
         return null;
     }
+
+    public SecretKey getSecretKey() {
+        byte[] keyBytes = Base64.from(jwtKey).decode();
+        return new SecretKeySpec(keyBytes, 0, keyBytes.length, JWT_ALGORITHM.getName());
+    }
+
+    public Jwt confirmValidRefreshToken(String token) {
+        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(getSecretKey()).macAlgorithm(JWT_ALGORITHM)
+                .build();
+        try {
+            return jwtDecoder.decode(token);
+        } catch (Exception e) {
+            System.out.println(">>> Refresh_token gets error: " + e.getMessage());
+            throw e;
+        }
+    }
+
     // =========================
-    
-    public String generateAccessToken(Authentication authentication){
+    public String generateAccessToken(String email, ResLoginDTO user) {
+        ResLoginDTO.InfoWithinToken token = new ResLoginDTO.InfoWithinToken();
+        token.setId(user.getUser().getId());
+        token.setEmail(user.getUser().getEmail());
+        token.setName(user.getUser().getName());
         // assign to claim
         Instant now = Instant.now();
         Instant validity = now.plus(this.accessTokenExpire, ChronoUnit.SECONDS);
- 
+
         // @formatter:off
         JwtClaimsSet claims = JwtClaimsSet.builder()
         .issuedAt(now)
         .expiresAt(validity)
-        .subject(authentication.getName())
-        .claim("user account", authentication)
+        .subject(email)
+        .claim("user account", token)
         .build();
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();

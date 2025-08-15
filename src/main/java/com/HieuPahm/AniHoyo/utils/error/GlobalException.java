@@ -6,6 +6,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.HieuPahm.AniHoyo.domain.RestResponse;
 
@@ -33,5 +34,26 @@ public class GlobalException {
         res.setError(ex.getMessage());
         res.setMessage("FILE UPLOAD OCCURS SOME ERRORS...");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
+    // handle 404
+    @ExceptionHandler(value = {
+        NoResourceFoundException.class,
+    })
+    public ResponseEntity<RestResponse<Object>> handleNotFoundException(Exception ex){
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatusCode(HttpStatus.NOT_FOUND.value());
+        res.setError(ex.getMessage());
+        res.setMessage("Oops!!, 404 Not found... URL may be not exist");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
+    @ExceptionHandler(value = {
+        InternalError.class,
+    })
+    public ResponseEntity<RestResponse<Object>> handleServerException(Exception ex){
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        res.setError(ex.getMessage());
+        res.setMessage("Oops!!, Server got some Ufo... please get back later!");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
     }
 }

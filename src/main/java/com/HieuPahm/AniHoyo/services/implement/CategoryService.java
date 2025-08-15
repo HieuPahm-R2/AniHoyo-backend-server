@@ -24,7 +24,8 @@ public class CategoryService implements ICategoryService {
     private final ModelMapper modelMapper;
     private final FilmRepository filmRepository;
 
-    public CategoryService(CategoryRepository categoryRepository,ModelMapper modelMapper, FilmRepository filmRepository){
+    public CategoryService(CategoryRepository categoryRepository, ModelMapper modelMapper,
+            FilmRepository filmRepository) {
         this.categoryRepository = categoryRepository;
         this.modelMapper = modelMapper;
         this.filmRepository = filmRepository;
@@ -32,34 +33,32 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public CategoryDTO insert(CategoryDTO dto) {
-        
+
         return modelMapper.map(categoryRepository.save(modelMapper.map(dto, Category.class)), CategoryDTO.class);
     }
 
     @Override
     public CategoryDTO getById(Long id) {
         return modelMapper.map(categoryRepository.findById(id).orElseThrow(
-            () -> new NoSuchElementException("Not Found")
-        ), CategoryDTO.class);
+                () -> new NoSuchElementException("Not Found")), CategoryDTO.class);
     }
 
     @Override
-    public void update(CategoryDTO dto) {
-        categoryRepository.save(modelMapper.map(dto, Category.class));
+    public CategoryDTO update(CategoryDTO dto) {
+        return modelMapper.map(categoryRepository.save(modelMapper.map(dto, Category.class)), CategoryDTO.class);
     }
-
 
     @Override
     public void delete(Long id) {
-        Category category = categoryRepository.findById(id).orElseThrow(null);
+        Category category = categoryRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Not Found"));
         Set<Film> listFilms = category.getFilmList();
         listFilms.forEach(item -> item.getCategories().remove(category));
         filmRepository.saveAll(listFilms);
-        categoryRepository.deleteById(id);;
+        categoryRepository.deleteById(id);
     }
 
     @Override
-    public PaginationResultDTO getAll(Specification<Category> spec,Pageable pageable) {
+    public PaginationResultDTO getAll(Specification<Category> spec, Pageable pageable) {
         Page<Category> pageCheck = this.categoryRepository.findAll(spec, pageable);
         PaginationResultDTO res = new PaginationResultDTO();
         PaginationResultDTO.Meta mt = new PaginationResultDTO.Meta();
@@ -68,9 +67,9 @@ public class CategoryService implements ICategoryService {
         mt.setPages(pageCheck.getTotalPages());
         mt.setTotal(pageCheck.getTotalElements());
         res.setMeta(mt);
-        //remove sensitive data
+        // remove sensitive data
         res.setResult(pageCheck.getContent());
         return res;
     }
-    
+
 }

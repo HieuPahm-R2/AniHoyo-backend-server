@@ -39,7 +39,6 @@ public class User {
 
     @NotBlank(message = "Email not be blank..")
     @Column(unique = true)
-    @Email(message = "Chưa đúng định dạng Email..")
     private String email;
 
     @NotBlank(message = "Password not be blank..")
@@ -50,9 +49,9 @@ public class User {
 
     private String createdBy;
     private String updatedBy;
-
-    private String refreshToken;
     
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String refreshToken;
     
     // db relationship
     @ManyToOne

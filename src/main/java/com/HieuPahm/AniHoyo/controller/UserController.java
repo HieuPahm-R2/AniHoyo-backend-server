@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
+import com.HieuPahm.AniHoyo.dtos.auth.UpdateUserDTO;
 import com.HieuPahm.AniHoyo.dtos.auth.UserDTO;
 import com.HieuPahm.AniHoyo.entities.User;
 import com.HieuPahm.AniHoyo.services.implement.UserService;
@@ -27,36 +29,43 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1")
 public class UserController {
     private final UserService userService;
-   
 
-    public UserController(UserService userService, PasswordEncoder passwordEncoder){
+    public UserController(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
     }
 
     @PostMapping("/user-create")
-    @MessageApi("Register new account action")
-    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody User dataUser) throws BadActionException{
+    @MessageApi("create new account action")
+    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody User dataUser) throws BadActionException {
         // User accUser = this.userService.handleCreateUser(dataUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.create(dataUser));
     }
+
+    @PutMapping("/update-user")
+    @MessageApi("Update user information action")
+    public ResponseEntity<UpdateUserDTO> getUpdateUserInfo(@Valid @RequestBody User user) throws BadActionException {
+        return ResponseEntity.ok(this.userService.update(user));
+    }
+
     @GetMapping("/user/{id}")
     @MessageApi("Get information user action")
-    public ResponseEntity<UserDTO> getInfo(@PathVariable("id") long id) throws BadActionException{
+    public ResponseEntity<UserDTO> getInfo(@PathVariable("id") long id) throws BadActionException {
         // User accUser = this.userService.handleCreateUser(dataUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.getInfo(id));
     }
+
     @DeleteMapping("/user/{id}")
     @MessageApi("Delete acction")
-    public ResponseEntity<Void> deleteUser(@PathVariable("id") long id) throws BadActionException{
+    public ResponseEntity<Void> deleteUser(@PathVariable("id") long id) throws BadActionException {
         this.userService.delete(id);
         return ResponseEntity.ok(null);
     }
-    //get all users
+
+    // get all users
     @GetMapping("/users")
     @MessageApi("Fetch All Users action")
     public ResponseEntity<PaginationResultDTO> getAllUsersInfo(
-        @Filter Specification<User> spec, Pageable pageable
-    ){
-        return ResponseEntity.status(HttpStatus.OK).body(this.userService.getAll(spec,pageable)) ;
+            @Filter Specification<User> spec, Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK).body(this.userService.getAll(spec, pageable));
     }
 }
