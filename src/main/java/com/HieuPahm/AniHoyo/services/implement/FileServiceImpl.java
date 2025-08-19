@@ -20,18 +20,18 @@ import com.HieuPahm.AniHoyo.services.IFileService;
 public class FileServiceImpl implements IFileService {
     @Value("${hieupham.upload-file.base-uri}")
     private String baseURI;
+
     @Override
-    public void createFolder(String folderName) throws URISyntaxException  {
-        // TODO Auto-generated method stub
+    public void createFolder(String folderName) throws URISyntaxException {
         URI uri = new URI(folderName);
         Path path = Paths.get(uri);
         File tmpDir = new File(path.toString());
         if (!tmpDir.isDirectory()) {
-        try {
-            Files.createDirectory(tmpDir.toPath());
-            System.out.println(">>> CREATE NEW DIRECTORY SUCCESSFUL, PATH = " + tmpDir.toPath());
-                } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                Files.createDirectory(tmpDir.toPath());
+                System.out.println(">>> CREATE NEW DIRECTORY SUCCESSFUL, PATH = " + tmpDir.toPath());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         } else {
             System.out.println(">>> SKIP MAKING DIRECTORY, ALREADY EXISTS");
@@ -40,15 +40,12 @@ public class FileServiceImpl implements IFileService {
 
     @Override
     public String storeFile(MultipartFile file, String folderName) throws IOException, URISyntaxException {
-        // TODO Auto-generated method stub
         String finalName = System.currentTimeMillis() + "-" + file.getOriginalFilename();
         URI uri = new URI(baseURI + folderName + "/" + finalName);
         Path path = Paths.get(uri);
         // Ensure parent directories exist
-        // Files.createDirectories(path.getParent());
         try (InputStream inputStream = file.getInputStream()) {
-            Files.copy(inputStream, path,
-            StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
             return finalName;
         }
     }

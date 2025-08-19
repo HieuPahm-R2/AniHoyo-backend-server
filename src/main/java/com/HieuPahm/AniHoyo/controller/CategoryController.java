@@ -56,7 +56,7 @@ public class CategoryController {
         return ResponseEntity.ok().body(null);
     }
 
-    @GetMapping("/get-all-category")
+    @GetMapping("/categories")
     @MessageApi("Fetch all categories with pagination")
     public ResponseEntity<PaginationResultDTO> getAllCategories(@Filter Specification<Category> spec,
             Pageable pageable) {

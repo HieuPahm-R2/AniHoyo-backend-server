@@ -3,7 +3,7 @@ package com.HieuPahm.AniHoyo.entities;
 import java.time.Instant;
 
 import com.HieuPahm.AniHoyo.utils.SecurityUtils;
-import com.HieuPahm.AniHoyo.utils.constant.GenderEnum;
+import com.HieuPahm.AniHoyo.utils.constant.GenersEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,7 +32,7 @@ import lombok.Setter;
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy =  GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @NotBlank(message = "Name not be blank..")
     private String fullName;
@@ -44,32 +44,36 @@ public class User {
     @NotBlank(message = "Password not be blank..")
     private String password;
 
+    private String avatar;
+
     private Instant createdTime;
     private Instant updatedTime;
 
     private String createdBy;
     private String updatedBy;
-    
+
     @Column(columnDefinition = "MEDIUMTEXT")
     private String refreshToken;
-    
+
     // db relationship
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
-    
-    //===============
 
+    // ===============
     @PrePersist
     public void handleBeforeCreate() {
-        this.createdBy = SecurityUtils.getCurrentUserLogin().isPresent() == true ?
-            SecurityUtils.getCurrentUserLogin().get() : " ";
+        this.createdBy = SecurityUtils.getCurrentUserLogin().isPresent() == true
+                ? SecurityUtils.getCurrentUserLogin().get()
+                : " ";
         this.createdTime = Instant.now();
     }
+
     @PreUpdate
     public void handleBeforeUpdate() {
-        this.updatedBy = SecurityUtils.getCurrentUserLogin().isPresent() == true ?
-            SecurityUtils.getCurrentUserLogin().get() : " ";
+        this.updatedBy = SecurityUtils.getCurrentUserLogin().isPresent() == true
+                ? SecurityUtils.getCurrentUserLogin().get()
+                : " ";
         this.updatedTime = Instant.now();
     }
 }

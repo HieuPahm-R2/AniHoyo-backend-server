@@ -40,7 +40,7 @@ public class TagController {
         return ResponseEntity.ok().body(tagService.update(tag));
     }
 
-    @GetMapping("/all-tags")
+    @GetMapping("/tags")
     @MessageApi("Fetch all tags with pagination")
     public ResponseEntity<PaginationResultDTO> getAllCategories(@Filter Specification<Tag> spec, Pageable pageable) {
         return ResponseEntity.ok().body(this.tagService.getAll(spec, pageable));

@@ -13,38 +13,41 @@ import com.HieuPahm.AniHoyo.domain.RestResponse;
 import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.core.io.Resource;
 
 @ControllerAdvice
 public class FormatRestResponse implements ResponseBodyAdvice<Object> {
-    @Override
-    public boolean supports(MethodParameter returnType, Class converterType) {
-        return true;
-    }
-    @Override
-    @Nullable
-    public Object beforeBodyWrite(@Nullable Object arg0, 
-    MethodParameter arg1, 
-    MediaType arg2, 
-    Class arg3,
-    ServerHttpRequest arg4, ServerHttpResponse arg5) {
-        HttpServletResponse servletResponse = ((ServletServerHttpResponse) arg5).getServletResponse();
-        int status = servletResponse.getStatus();
-        RestResponse<Object> res = new RestResponse<>();
-        if(arg0 instanceof String){
-            return arg0;
-        }
-        //========= error case=========
-        if(status >= 400){
-            return arg0;
-        }else{
-            // ====== success case =======
-            res.setData(arg0);
-            MessageApi message = arg1.getMethodAnnotation(MessageApi.class);
-            res.setMessage(message != null ? message.value() : "API HAS BEEN SUCCESSFULLY CALLED");
-        }
-        return res;
-    }
+	@Override
+	public boolean supports(MethodParameter returnType, Class converterType) {
+		return true;
+	}
 
-   
-    
+	@Override
+	@Nullable
+	public Object beforeBodyWrite(@Nullable Object arg0,
+			MethodParameter arg1,
+			MediaType arg2,
+			Class arg3, ServerHttpRequest arg4, ServerHttpResponse arg5) {
+		HttpServletResponse servletResponse = ((ServletServerHttpResponse) arg5).getServletResponse();
+		int status = servletResponse.getStatus();
+		RestResponse<Object> res = new RestResponse<>();
+		if (arg0 instanceof String) {
+			return arg0;
+		}
+		// Skip wrapping for Resource (file/stream) responses
+		if (arg0 instanceof Resource) {
+			return arg0;
+		}
+		// ========= error case=========
+		if (status >= 400) {
+			return arg0;
+		} else {
+			// ====== success case =======
+			res.setData(arg0);
+			MessageApi message = arg1.getMethodAnnotation(MessageApi.class);
+			res.setMessage(message != null ? message.value() : "API HAS BEEN SUCCESSFULLY CALLED");
+		}
+		return res;
+	}
+
 }

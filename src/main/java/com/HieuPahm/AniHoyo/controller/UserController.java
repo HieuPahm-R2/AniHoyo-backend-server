@@ -43,7 +43,7 @@ public class UserController {
 
     @PutMapping("/update-user")
     @MessageApi("Update user information action")
-    public ResponseEntity<UpdateUserDTO> getUpdateUserInfo(@Valid @RequestBody User user) throws BadActionException {
+    public ResponseEntity<UpdateUserDTO> getUpdateUserInfo(@RequestBody User user) throws BadActionException {
         return ResponseEntity.ok(this.userService.update(user));
     }
 

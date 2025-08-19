@@ -12,48 +12,51 @@ import com.HieuPahm.AniHoyo.domain.RestResponse;
 
 @RestControllerAdvice
 public class GlobalException {
-     @ExceptionHandler(value = {
-        UsernameNotFoundException.class,
-        BadCredentialsException.class,
-        BadActionException.class
+    @ExceptionHandler(value = {
+            UsernameNotFoundException.class,
+            BadCredentialsException.class,
+            BadActionException.class
     })
-    public ResponseEntity<RestResponse<Object>> handleBadActionException(Exception ex){
+    public ResponseEntity<RestResponse<Object>> handleBadActionException(Exception ex) {
         RestResponse<Object> res = new RestResponse<>();
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
         res.setError(ex.getMessage());
         res.setMessage("INVALID EXCEPTION OCCURS...");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
+
     // Handle file
     @ExceptionHandler(value = {
-        StorageException.class
+            StorageException.class
     })
-    public ResponseEntity<RestResponse<Object>> handleUploadFileException(Exception ex){
+    public ResponseEntity<RestResponse<Object>> handleUploadFileException(Exception ex) {
         RestResponse<Object> res = new RestResponse<>();
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
         res.setError(ex.getMessage());
         res.setMessage("FILE UPLOAD OCCURS SOME ERRORS...");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
+
     // handle 404
     @ExceptionHandler(value = {
-        NoResourceFoundException.class,
+            NoResourceFoundException.class,
     })
-    public ResponseEntity<RestResponse<Object>> handleNotFoundException(Exception ex){
+    public ResponseEntity<RestResponse<Object>> handleNotFoundException(Exception ex) {
         RestResponse<Object> res = new RestResponse<>();
         res.setStatusCode(HttpStatus.NOT_FOUND.value());
         res.setError(ex.getMessage());
         res.setMessage("Oops!!, 404 Not found... URL may be not exist");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
-    @ExceptionHandler(value = {
-        InternalError.class,
-    })
-    public ResponseEntity<RestResponse<Object>> handleServerException(Exception ex){
-        RestResponse<Object> res = new RestResponse<>();
-        res.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        res.setError(ex.getMessage());
-        res.setMessage("Oops!!, Server got some Ufo... please get back later!");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
-    }
+    // @ExceptionHandler(value = {
+    // InternalError.class,
+    // })
+    // public ResponseEntity<RestResponse<Object>> handleServerException(Exception
+    // ex){
+    // RestResponse<Object> res = new RestResponse<>();
+    // res.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+    // res.setError(ex.getMessage());
+    // res.setMessage("Oops!!, Server got some Ufo... please get back later!");
+    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
+    // }
 }

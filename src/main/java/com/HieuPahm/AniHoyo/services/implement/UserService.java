@@ -64,9 +64,10 @@ public class UserService implements IUserService {
             throw new BadActionException("Not Found");
         }
         currentUser.get().setFullName(data.getFullName());
+        currentUser.get().setEmail(data.getEmail());
         if (data.getRole() != null) {
             Optional<Role> res = this.roleRepository.findById(data.getRole().getId());
-            data.setRole(res.isPresent() ? res.get() : null);
+            currentUser.get().setRole(res.isPresent() ? res.get() : null);
         }
         this.userRepository.save(currentUser.get());
         return modelMapper.map(currentUser.get(), UpdateUserDTO.class);

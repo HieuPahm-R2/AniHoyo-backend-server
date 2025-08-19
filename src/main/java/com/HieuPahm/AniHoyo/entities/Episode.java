@@ -1,9 +1,9 @@
 package com.HieuPahm.AniHoyo.entities;
 
-import java.time.Instant;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -16,21 +16,17 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Episode {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
     @Column(columnDefinition = "nvarchar(150)")
     private String title;
 
     private String filePath;
     private String contentType;
 
-    private Instant createdTime;
-    private Instant updatedTime;
-
-    private boolean status;
-    
     @ManyToOne
     @JoinColumn(name = "season_id")
     private Season season;

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.HieuPahm.AniHoyo.dtos.ResUpFileDTO;
-import com.HieuPahm.AniHoyo.services.IFileService;
+import com.HieuPahm.AniHoyo.services.implement.FileServiceImpl;
 import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
 import com.HieuPahm.AniHoyo.utils.error.StorageException;
 
@@ -25,30 +25,32 @@ public class FileController {
     @Value("${hieupham.upload-file.base-uri}")
     private String baseURI;
 
-    private final IFileService fileService;
-    public FileController(IFileService fileService){
+    private final FileServiceImpl fileService;
+
+    public FileController(FileServiceImpl fileService) {
         this.fileService = fileService;
     }
+
     @PostMapping("/files")
     @MessageApi("Upload Single file")
     public ResponseEntity<ResUpFileDTO> uploadData(
-        @RequestParam(name = "file", required = false) MultipartFile file,
-        @RequestParam("folder") String folder) throws URISyntaxException, IOException, StorageException{
-            // CHECK VALIDATE
-            if(file == null ||file.isEmpty()){
-                throw new StorageException("Not leave blank, Please upload!!");
-            }
-            String fileName = file.getOriginalFilename();
-            List<String> extensionsAllowed = Arrays.asList("pdf", "jpeg", "png","webp", "jpg");
-            boolean isValid = extensionsAllowed.stream().anyMatch(item -> fileName.toLowerCase().endsWith(item));
-            if(!isValid){
-                throw new StorageException("Invalid file format, Please try again!");
-            }
-            // handle create folder (Option)
-            this.fileService.createFolder(baseURI + folder);
-            String fileUpload = this.fileService.storeFile(file, folder);
-            ResUpFileDTO result = new ResUpFileDTO(fileUpload,Instant.now());
-
-            return ResponseEntity.ok().body(result);
+            @RequestParam(name = "file", required = false) MultipartFile file,
+            @RequestParam("folder") String folder) throws URISyntaxException, IOException, StorageException {
+        // CHECK VALIDATE
+        if (file == null || file.isEmpty()) {
+            throw new StorageException("Not leave blank, Please upload!!");
         }
+        String fileName = file.getOriginalFilename();
+        List<String> extensionsAllowed = Arrays.asList("pdf", "jpeg", "png", "webp", "jpg");
+        boolean isValid = extensionsAllowed.stream().anyMatch(item -> fileName.toLowerCase().endsWith(item));
+        if (!isValid) {
+            throw new StorageException("Invalid file format, Please try again!");
+        }
+        // handle create folder (Option)
+        this.fileService.createFolder(baseURI + folder);
+        String fileUpload = this.fileService.storeFile(file, folder);
+        ResUpFileDTO result = new ResUpFileDTO(fileUpload, Instant.now());
+
+        return ResponseEntity.ok().body(result);
+    }
 }

@@ -62,7 +62,7 @@ public class FilmController {
         return ResponseEntity.ok().body(null);
     }
 
-    @GetMapping("/all-films")
+    @GetMapping("/films")
     @MessageApi("Fetch all data films")
     public ResponseEntity<PaginationResultDTO> getAllFilms(@Filter Specification<Film> spec, Pageable pageable) {
         return ResponseEntity.ok().body(this.filmService.getAll(spec, pageable));

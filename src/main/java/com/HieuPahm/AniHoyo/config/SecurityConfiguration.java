@@ -18,43 +18,45 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfiguration {
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
-            throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
+        @Bean
+        public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+                        throws Exception {
+                return authenticationConfiguration.getAuthenticationManager();
+        }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, AuthEntryPointConfig authEntryPointConfig)
-            throws Exception {
-        String[] whileList = {
-                "/",
-                "/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/register",
-                "/storage/**",
-                "/v3/api-docs/**",
-                "/swagger-ui/**",
-                "/swagger-ui.html"
-        };
-        http
-                .csrf(c -> c.disable())
-                .cors(Customizer.withDefaults())
-                .authorizeHttpRequests(
-                        authz -> authz
-                                .requestMatchers(whileList).permitAll()
-                                .anyRequest().authenticated())
-                .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
-                        .authenticationEntryPoint(authEntryPointConfig))
-                // Default config
-                .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
-                        .accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
-                .formLogin(f -> f.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        return http.build();
-    }
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http, AuthEntryPointConfig authEntryPointConfig)
+                        throws Exception {
+                String[] whileList = {
+                                "/",
+                                "/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/register",
+                                "/api/v1/stream/range/**",
+                                "/storage/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                };
+                http
+                                .csrf(c -> c.disable())
+                                .cors(Customizer.withDefaults())
+                                .authorizeHttpRequests(
+                                                authz -> authz
+                                                                .requestMatchers(whileList).permitAll()
+                                                                .anyRequest().authenticated())
+                                .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
+                                                .authenticationEntryPoint(authEntryPointConfig))
+                                // Default config
+                                .exceptionHandling(exceptions -> exceptions
+                                                .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
+                                                .accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
+                                .formLogin(f -> f.disable())
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                return http.build();
+        }
 }

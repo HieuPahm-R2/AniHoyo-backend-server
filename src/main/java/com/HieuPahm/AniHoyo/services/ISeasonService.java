@@ -1,5 +1,7 @@
 package com.HieuPahm.AniHoyo.services;
 
-public interface ISeasonService {
-    
+import com.HieuPahm.AniHoyo.dtos.SeasonDTO;
+
+public interface ISeasonService extends ICrudService<SeasonDTO, Long> {
+
 }

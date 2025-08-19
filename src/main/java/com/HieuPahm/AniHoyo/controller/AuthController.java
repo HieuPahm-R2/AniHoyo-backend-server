@@ -114,8 +114,15 @@ public class AuthController {
         if (refreshToken.equals("error")) {
             throw new BadActionException("Refresh token not be attached in request");
         }
-        // running check valid
-        Jwt correctToken = this.securityUtils.confirmValidRefreshToken(refreshToken);
+        Jwt correctToken;
+        try {
+            // running check valid
+            correctToken = this.securityUtils.confirmValidRefreshToken(refreshToken);
+        } catch (Exception ex) {
+            // Nếu token hết hạn hoặc không hợp lệ, trả về lỗi 400
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(null);
+        }
         String email = correctToken.getSubject();
         User currentUser = this.userService.fetchWithTokenAndEmail(refreshToken, email);
         if (currentUser == null) {

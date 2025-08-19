@@ -1,15 +1,7 @@
 package com.HieuPahm.AniHoyo.services;
 
-import com.HieuPahm.AniHoyo.entities.Episode;
-import org.springframework.web.multipart.MultipartFile;
+import com.HieuPahm.AniHoyo.dtos.EpisodeDTO;
 
-public interface IEpisodeService {
-    // save video
-    Episode saveVideo(Episode episode, MultipartFile multipartFile);
-    // get video by id
-    Episode getVideo(String videoId);
-    // get video with title
-    Episode getVideoByTitle(String title);
-
+public interface IEpisodeService extends ICrudService<EpisodeDTO, Long> {
 
 }
