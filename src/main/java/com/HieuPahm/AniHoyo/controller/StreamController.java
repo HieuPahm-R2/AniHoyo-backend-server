@@ -54,7 +54,6 @@ public class StreamController {
         if (episode.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-
         URI uri = URI.create(baseURI + "videos/" + episode.get().getFilePath());
         Path path = Paths.get(uri);
 
@@ -82,7 +81,6 @@ public class StreamController {
                     .contentLength(fileLength)
                     .body(resource);
         }
-
         // --- xử lý Range header ---
         long rangeStart;
         long rangeEnd;
@@ -95,20 +93,16 @@ public class StreamController {
         } else {
             rangeEnd = rangeStart + ChunkConstant.CHUNK_SIZE - 1;
         }
-
         if (rangeEnd >= fileLength) {
             rangeEnd = fileLength - 1;
         }
-
         // nếu file rỗng thì trả lỗi
         if (fileLength <= 0 || rangeStart > rangeEnd) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
         try (InputStream inputStream = Files.newInputStream(path)) {
             inputStream.skip(rangeStart);
             long contentLength = rangeEnd - rangeStart + 1;
-
             byte[] data = new byte[(int) contentLength];
             int read = inputStream.read(data, 0, data.length);
 
@@ -132,5 +126,47 @@ public class StreamController {
         } catch (IOException ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GetMapping("/{id}/master.m3u8")
+    public ResponseEntity<Resource> serverMasterFile(
+            @PathVariable("id") long id) {
+        Optional<Episode> episode = this.episodeRepository.findById(id);
+        if (episode.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        Path path = Paths.get(baseURI, episode.get().getTitle(), "master.m3u8");
+
+        if (!Files.exists(path)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Resource resource = new FileSystemResource(path);
+
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.CONTENT_TYPE, "application/vnd.apple.mpegurl")
+                .body(resource);
+    }
+
+    // serve the segments
+    @GetMapping("/{id}/{segment}.ts")
+    public ResponseEntity<Resource> serveSegments(
+            @PathVariable("id") long id,
+            @PathVariable String segment) {
+        Optional<Episode> episode = this.episodeRepository.findById(id);
+        if (episode.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        // create path for segment
+        Path path = Paths.get(baseURI, episode.get().getTitle(), segment + ".ts");
+        if (!Files.exists(path)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Resource resource = new FileSystemResource(path);
+
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.CONTENT_TYPE, "video/mp2t")
+                .body(resource);
     }
 }

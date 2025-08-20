@@ -24,6 +24,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,6 +43,10 @@ public class EpisodeService implements IEpisodeService {
     private FilterParser filterParser;
     @Autowired
     private FilterSpecificationConverter filterSpecificationConverter;
+    @Value("${hieupham.upload-file.base-uri}")
+    private String baseURI;
+    @Value("${hieupham.ffmpeg-path:ffmpeg}")
+    private String ffmpegPath;
 
     private final EpisodeRepository episodeRepository;
     private final SeasonRepository seasonRepository;
@@ -50,8 +61,10 @@ public class EpisodeService implements IEpisodeService {
 
     @Override
     public EpisodeDTO insert(EpisodeDTO dto) {
-        return modelMapper.map(this.episodeRepository.save(
-                modelMapper.map(dto, Episode.class)), EpisodeDTO.class);
+        // process video
+        Episode ep = this.episodeRepository.save(modelMapper.map(dto, Episode.class));
+        processVideo(ep.getId());
+        return modelMapper.map(ep, EpisodeDTO.class);
     }
 
     @Override
@@ -105,5 +118,62 @@ public class EpisodeService implements IEpisodeService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public long processVideo(long id) {
+        Episode episode = this.episodeRepository.findById(id).get();
+        String filePath = episode.getFilePath();
+
+        URI uri2 = URI.create(baseURI + "videos/" + filePath);
+        Path videoPath = Paths.get(uri2);
+
+        try {
+            URI uri = URI.create(baseURI + "videos_hls/" + episode.getTitle());
+            Path outputPath = Paths.get(uri);
+
+            Files.createDirectories(outputPath);
+
+            Path segmentPath = outputPath.resolve("segment_%3d.ts");
+            Path playlistPath = outputPath.resolve("master.m3u8");
+
+            ProcessBuilder processBuilder = new ProcessBuilder(
+                    ffmpegPath,
+                    "-nostdin",
+                    "-y",
+                    "-i", videoPath.toString(),
+                    "-c:v", "libx264",
+                    "-c:a", "aac",
+                    "-f", "hls",
+                    "-hls_time", "10",
+                    "-hls_list_size", "0",
+                    "-hls_segment_filename", segmentPath.toString(),
+                    playlistPath.toString()
+            );
+            System.out.println(String.join(" ", processBuilder.command()));
+            processBuilder.redirectErrorStream(true);
+            Process process = processBuilder.start();
+
+            StringBuilder output = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append(System.lineSeparator());
+                }
+            }
+
+            int exit = process.waitFor();
+            if (exit != 0) {
+                String msg = output.length() > 0 ? output.toString() : "unknown error";
+                throw new RuntimeException("processing failed !!\n" + msg);
+            }
+            return id;
+
+        } catch (IOException ex) {
+            throw new RuntimeException("processing failed !!\n" + ex.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
     }
 }

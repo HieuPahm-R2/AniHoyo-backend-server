@@ -26,4 +26,4 @@ server:
 hieupham:
   upload-file:
     base-uri: file:///D:/WhatWeDone-Will/AniHoyo-ReactSpring-restfulService/storage/
-    
+  ffmpeg-path: C:\ffmpeg\bin\ffmpeg.exe
