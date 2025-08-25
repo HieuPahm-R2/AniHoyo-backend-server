@@ -1,13 +1,12 @@
 package com.HieuPahm.AniHoyo.controller;
 
-import com.HieuPahm.AniHoyo.dtos.EpisodeDTO;
-import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
-import com.HieuPahm.AniHoyo.dtos.ResUpFileDTO;
+import com.HieuPahm.AniHoyo.model.dtos.EpisodeDTO;
+import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
+import com.HieuPahm.AniHoyo.model.dtos.ResUpFileDTO;
 import com.HieuPahm.AniHoyo.repository.EpisodeRepository;
 import com.HieuPahm.AniHoyo.services.implement.EpisodeService;
 import com.HieuPahm.AniHoyo.services.implement.FileServiceImpl;
 import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
-import com.HieuPahm.AniHoyo.utils.constant.ChunkConstant;
 import com.HieuPahm.AniHoyo.utils.error.BadActionException;
 import com.HieuPahm.AniHoyo.utils.error.StorageException;
 
@@ -62,14 +61,6 @@ public class EpisodeController {
     @PostMapping("/update-episode")
     public ResponseEntity<?> update(@Valid @RequestBody EpisodeDTO dto) throws BadActionException {
         return ResponseEntity.ok().body(this.episodeService.update(dto));
-    }
-
-    @GetMapping("/episode/{id}")
-    public ResponseEntity<EpisodeDTO> watch(@PathVariable("id") long id) throws BadActionException {
-        if (this.episodeRepository.findById(id).isEmpty()) {
-            throw new BadActionException("Not Found this episode");
-        }
-        return ResponseEntity.ok().body(this.episodeService.getById(id));
     }
 
     @DeleteMapping("/delete-episode/{id}")

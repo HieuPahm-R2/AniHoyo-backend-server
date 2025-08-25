@@ -1,4 +1,4 @@
-package com.HieuPahm.AniHoyo.dtos;
+package com.HieuPahm.AniHoyo.model.dtos;
 
 import java.time.Instant;
 import lombok.AllArgsConstructor;

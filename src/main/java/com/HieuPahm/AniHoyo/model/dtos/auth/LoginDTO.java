@@ -1,4 +1,4 @@
-package com.HieuPahm.AniHoyo.dtos.auth;
+package com.HieuPahm.AniHoyo.model.dtos.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

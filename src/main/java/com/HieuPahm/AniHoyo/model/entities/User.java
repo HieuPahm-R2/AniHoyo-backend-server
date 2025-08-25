@@ -1,58 +1,66 @@
-package com.HieuPahm.AniHoyo.entities;
+package com.HieuPahm.AniHoyo.model.entities;
 
 import java.time.Instant;
-import java.util.List;
 
 import com.HieuPahm.AniHoyo.utils.SecurityUtils;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.HieuPahm.AniHoyo.utils.constant.GenersEnum;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
-@Entity
-@Table(name = "roles")
-public class Role {
+@Table(name = "users")
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    @NotBlank(message = "Name not be blank..")
+    private String fullName;
 
-    @NotBlank(message = "Not to blank this field")
-    private String name;
+    @NotBlank(message = "Email not be blank..")
+    @Column(unique = true)
+    private String email;
 
-    private String description;
-    private boolean active;
+    @NotBlank(message = "Password not be blank..")
+    private String password;
+
+    private String avatar;
 
     private Instant createdTime;
     private Instant updatedTime;
 
     private String createdBy;
     private String updatedBy;
-    // ======
-    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<User> users;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JsonIgnoreProperties(value = { "roles" })
-    @JoinTable(name = "permission_role", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
-    private List<Permission> permissions;
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String refreshToken;
 
+    // db relationship
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
+
+    // ===============
     @PrePersist
     public void handleBeforeCreate() {
         this.createdBy = SecurityUtils.getCurrentUserLogin().isPresent() == true

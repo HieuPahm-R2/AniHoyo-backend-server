@@ -12,12 +12,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.HieuPahm.AniHoyo.dtos.CategoryDTO;
-import com.HieuPahm.AniHoyo.dtos.FilmDTO;
-import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
-import com.HieuPahm.AniHoyo.dtos.TagDTO;
-import com.HieuPahm.AniHoyo.entities.Film;
-import com.HieuPahm.AniHoyo.entities.Season;
+import com.HieuPahm.AniHoyo.model.dtos.CategoryDTO;
+import com.HieuPahm.AniHoyo.model.dtos.FilmDTO;
+import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
+import com.HieuPahm.AniHoyo.model.dtos.TagDTO;
+import com.HieuPahm.AniHoyo.model.entities.Film;
+import com.HieuPahm.AniHoyo.model.entities.Season;
 import com.HieuPahm.AniHoyo.repository.CategoryRepository;
 import com.HieuPahm.AniHoyo.repository.EpisodeRepository;
 import com.HieuPahm.AniHoyo.repository.FilmRepository;

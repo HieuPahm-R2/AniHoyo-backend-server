@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
-import com.HieuPahm.AniHoyo.entities.Role;
+import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
+import com.HieuPahm.AniHoyo.model.entities.Role;
 import com.HieuPahm.AniHoyo.repository.RoleRepository;
 import com.HieuPahm.AniHoyo.services.implement.RoleService;
 import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;

@@ -17,10 +17,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.HieuPahm.AniHoyo.dtos.auth.LoginDTO;
-import com.HieuPahm.AniHoyo.dtos.auth.ResLoginDTO;
-import com.HieuPahm.AniHoyo.dtos.auth.UserDTO;
-import com.HieuPahm.AniHoyo.entities.User;
+import com.HieuPahm.AniHoyo.model.dtos.auth.LoginDTO;
+import com.HieuPahm.AniHoyo.model.dtos.auth.ResLoginDTO;
+import com.HieuPahm.AniHoyo.model.dtos.auth.RoleDTO;
+import com.HieuPahm.AniHoyo.model.dtos.auth.UserDTO;
+import com.HieuPahm.AniHoyo.model.entities.Role;
+import com.HieuPahm.AniHoyo.model.entities.User;
 import com.HieuPahm.AniHoyo.services.IUserService;
 import com.HieuPahm.AniHoyo.utils.SecurityUtils;
 import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
@@ -154,6 +156,16 @@ public class AuthController {
                 .build();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, resCookies.toString()).body(resLoginDTO);
+    }
+
+    /**
+     * Helper method to convert Role entity to RoleDTO
+     */
+    private RoleDTO convertRoleToRoleDTO(Role role) {
+        if (role == null) {
+            return null;
+        }
+        return new RoleDTO(role.getId(), role.getName(), role.getDescription());
     }
 
     @PostMapping("/auth/logout")

@@ -1,6 +1,6 @@
-package com.HieuPahm.AniHoyo.dtos;
+package com.HieuPahm.AniHoyo.model.dtos;
 
-import com.HieuPahm.AniHoyo.entities.Season;
+import com.HieuPahm.AniHoyo.model.entities.Season;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.JoinColumn;

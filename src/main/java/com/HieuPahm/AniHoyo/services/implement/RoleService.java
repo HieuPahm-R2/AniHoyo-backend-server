@@ -9,9 +9,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
-import com.HieuPahm.AniHoyo.entities.Permission;
-import com.HieuPahm.AniHoyo.entities.Role;
+import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
+import com.HieuPahm.AniHoyo.model.entities.Permission;
+import com.HieuPahm.AniHoyo.model.entities.Role;
 import com.HieuPahm.AniHoyo.repository.PermissionRepository;
 import com.HieuPahm.AniHoyo.repository.RoleRepository;
 import com.HieuPahm.AniHoyo.services.IRoleService;

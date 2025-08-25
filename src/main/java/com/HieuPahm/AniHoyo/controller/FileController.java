@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.HieuPahm.AniHoyo.dtos.ResUpFileDTO;
+import com.HieuPahm.AniHoyo.model.dtos.ResUpFileDTO;
 import com.HieuPahm.AniHoyo.services.implement.FileServiceImpl;
 import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
 import com.HieuPahm.AniHoyo.utils.error.StorageException;

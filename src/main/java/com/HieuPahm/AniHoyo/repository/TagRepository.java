@@ -6,8 +6,8 @@ import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import com.HieuPahm.AniHoyo.dtos.TagDTO;
-import com.HieuPahm.AniHoyo.entities.Tag;
+import com.HieuPahm.AniHoyo.model.dtos.TagDTO;
+import com.HieuPahm.AniHoyo.model.entities.Tag;
 
 public interface TagRepository extends JpaRepository<Tag, Long>, JpaSpecificationExecutor<Tag> {
     Set<TagDTO> findByIdIn(List<Long> id);

@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
-import com.HieuPahm.AniHoyo.entities.Permission;
+import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
+import com.HieuPahm.AniHoyo.model.entities.Permission;
 import com.HieuPahm.AniHoyo.services.implement.PermissionService;
 import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
 import com.HieuPahm.AniHoyo.utils.error.BadActionException;
@@ -43,11 +43,16 @@ public class PermissionController {
         return ResponseEntity.ok().body(this.permissionService.update(data));
     }
 
-    @DeleteMapping("/permission/{id}")
+    @DeleteMapping("/delete-permission/{id}")
     @MessageApi("Delete action - permission domain")
     public ResponseEntity<Void> handleDelete(@PathVariable("id") long id) throws BadActionException {
         this.permissionService.delete(id);
         return ResponseEntity.ok().body(null);
+    }
+
+    @GetMapping("/permission/{id}")
+    public ResponseEntity<Permission> getById(@PathVariable long id) throws BadActionException {
+        return ResponseEntity.ok().body(this.permissionService.getById(id));
     }
 
     @GetMapping("/permissions")

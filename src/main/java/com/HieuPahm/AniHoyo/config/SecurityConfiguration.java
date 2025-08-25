@@ -2,7 +2,6 @@ package com.HieuPahm.AniHoyo.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -14,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableMethodSecurity(securedEnabled = true)
@@ -43,10 +43,24 @@ public class SecurityConfiguration {
                 };
                 http
                                 .csrf(c -> c.disable())
-                                .cors(Customizer.withDefaults())
+                                .cors(Customizer.withDefaults()) // This will use the CorsConfigure bean
                                 .authorizeHttpRequests(
                                                 authz -> authz
                                                                 .requestMatchers(whileList).permitAll()
+                                                                .requestMatchers(HttpMethod.GET,
+                                                                                "/api/v1/*/master.m3u8")
+                                                                .permitAll()
+                                                                .requestMatchers(HttpMethod.GET, "/api/v1/*/*.ts")
+                                                                .permitAll()
+                                                                // Quality-specific playlist files (360p/index.m3u8,
+                                                                // 720p/index.m3u8, etc.)
+                                                                .requestMatchers(HttpMethod.GET,
+                                                                                "/api/v1/*/*/index.m3u8")
+                                                                .permitAll()
+                                                                // HLS segments with quality folder (*/quality/*.ts)
+                                                                .requestMatchers(HttpMethod.GET,
+                                                                                "/api/v1/*/*/*.ts")
+                                                                .permitAll()
                                                                 .anyRequest().authenticated())
                                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
                                                 .authenticationEntryPoint(authEntryPointConfig))

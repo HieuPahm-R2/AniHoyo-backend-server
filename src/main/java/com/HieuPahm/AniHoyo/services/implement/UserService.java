@@ -11,11 +11,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
-import com.HieuPahm.AniHoyo.dtos.auth.UpdateUserDTO;
-import com.HieuPahm.AniHoyo.dtos.auth.UserDTO;
-import com.HieuPahm.AniHoyo.entities.Role;
-import com.HieuPahm.AniHoyo.entities.User;
+
+import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
+import com.HieuPahm.AniHoyo.model.dtos.auth.UpdateUserDTO;
+import com.HieuPahm.AniHoyo.model.dtos.auth.UserDTO;
+import com.HieuPahm.AniHoyo.model.entities.Role;
+import com.HieuPahm.AniHoyo.model.entities.User;
 import com.HieuPahm.AniHoyo.repository.RoleRepository;
 import com.HieuPahm.AniHoyo.repository.UserRepository;
 import com.HieuPahm.AniHoyo.services.IUserService;

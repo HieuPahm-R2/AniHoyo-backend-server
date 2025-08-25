@@ -1,10 +1,10 @@
 package com.HieuPahm.AniHoyo.repository;
 
-import com.HieuPahm.AniHoyo.entities.Episode;
-import com.HieuPahm.AniHoyo.entities.Season;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+import com.HieuPahm.AniHoyo.model.entities.Episode;
+import com.HieuPahm.AniHoyo.model.entities.Season;
 
 import java.util.List;
 import java.util.Optional;

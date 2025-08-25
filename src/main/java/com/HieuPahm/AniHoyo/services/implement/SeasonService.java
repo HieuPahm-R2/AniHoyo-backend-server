@@ -9,12 +9,14 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
-import com.HieuPahm.AniHoyo.dtos.SeasonDTO;
-import com.HieuPahm.AniHoyo.entities.Film;
-import com.HieuPahm.AniHoyo.entities.Season;
+import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
+import com.HieuPahm.AniHoyo.model.dtos.SeasonDTO;
+import com.HieuPahm.AniHoyo.model.entities.Film;
+import com.HieuPahm.AniHoyo.model.entities.Permission;
+import com.HieuPahm.AniHoyo.model.entities.Season;
 import com.HieuPahm.AniHoyo.repository.FilmRepository;
 import com.HieuPahm.AniHoyo.repository.SeasonRepository;
 import com.HieuPahm.AniHoyo.services.ISeasonService;
@@ -103,5 +105,20 @@ public class SeasonService implements ISeasonService {
                 .collect(Collectors.toList());
         ans.setResult(res);
         return ans;
+    }
+
+    public PaginationResultDTO fetchAll(Specification<Season> spec, Pageable pageable) {
+        Page<Season> page = this.seasonRepository.findAll(spec, pageable);
+        PaginationResultDTO rs = new PaginationResultDTO();
+        PaginationResultDTO.Meta mt = new PaginationResultDTO.Meta();
+
+        mt.setPage(page.getNumber() + 1);
+        mt.setPageSize(page.getSize());
+        mt.setPages(page.getTotalPages());
+        mt.setTotal(page.getTotalElements());
+
+        rs.setMeta(mt);
+        rs.setResult(page.getContent());
+        return rs;
     }
 }

@@ -1,4 +1,4 @@
-package com.HieuPahm.AniHoyo.entities;
+package com.HieuPahm.AniHoyo.model.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

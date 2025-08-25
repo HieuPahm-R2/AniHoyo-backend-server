@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
-import com.HieuPahm.AniHoyo.dtos.auth.UpdateUserDTO;
-import com.HieuPahm.AniHoyo.dtos.auth.UserDTO;
-import com.HieuPahm.AniHoyo.entities.User;
+import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
+import com.HieuPahm.AniHoyo.model.dtos.auth.UpdateUserDTO;
+import com.HieuPahm.AniHoyo.model.dtos.auth.UserDTO;
+import com.HieuPahm.AniHoyo.model.entities.User;
 import com.HieuPahm.AniHoyo.services.implement.UserService;
 import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
 import com.HieuPahm.AniHoyo.utils.error.BadActionException;

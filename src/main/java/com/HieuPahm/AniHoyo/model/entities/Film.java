@@ -1,4 +1,4 @@
-package com.HieuPahm.AniHoyo.entities;
+package com.HieuPahm.AniHoyo.model.entities;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -45,16 +45,9 @@ public class Film {
     private String thumbnail;
     @Column(columnDefinition = "nvarchar(4000)")
     private String slider;
-    @Column(columnDefinition = "nvarchar(4000)")
-    private String description;
-
-    private int releaseYear;
-
-    private boolean status;
 
     private Instant uploadDate;
     private Instant updatedTime;
-
     private String uploadBy;
     private String updatedBy;
 

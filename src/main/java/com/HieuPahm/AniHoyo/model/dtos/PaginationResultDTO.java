@@ -1,4 +1,4 @@
-package com.HieuPahm.AniHoyo.dtos;
+package com.HieuPahm.AniHoyo.model.dtos;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,10 +8,10 @@ import lombok.Setter;
 public class PaginationResultDTO {
     private Meta meta;
     private Object result;
-    
+
     @Getter
     @Setter
-    public static class Meta{
+    public static class Meta {
         private int page;
         private int pageSize;
         private int pages;

@@ -4,15 +4,14 @@ import java.util.List;
 import java.util.Set;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
-import com.HieuPahm.AniHoyo.dtos.TagDTO;
-import com.HieuPahm.AniHoyo.entities.Tag;
+import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
+import com.HieuPahm.AniHoyo.model.dtos.TagDTO;
+import com.HieuPahm.AniHoyo.model.entities.Tag;
 import com.HieuPahm.AniHoyo.repository.TagRepository;
 import com.HieuPahm.AniHoyo.services.ITagService;
 
@@ -45,8 +44,7 @@ public class TagService implements ITagService {
 
     @Override
     public void delete(Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
+        this.tagRepository.deleteById(id);
     }
 
     @Override

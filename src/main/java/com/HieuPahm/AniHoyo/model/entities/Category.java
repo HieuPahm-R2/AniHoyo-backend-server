@@ -1,4 +1,4 @@
-package com.HieuPahm.AniHoyo.entities;
+package com.HieuPahm.AniHoyo.model.entities;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,13 +26,13 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Category {
     @Id
-    @GeneratedValue(strategy =  GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(columnDefinition = "nvarchar(150)")
     private String name;
 
     @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
     @JsonIgnore
-    Set<Film> filmList = new HashSet<>();
+    Set<Film> films = new HashSet<>();
 }

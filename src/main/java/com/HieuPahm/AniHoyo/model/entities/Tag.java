@@ -1,4 +1,4 @@
-package com.HieuPahm.AniHoyo.entities;
+package com.HieuPahm.AniHoyo.model.entities;
 
 import java.util.Set;
 

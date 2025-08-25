@@ -1,4 +1,4 @@
-package com.HieuPahm.AniHoyo.dtos;
+package com.HieuPahm.AniHoyo.model.dtos;
 
 import java.time.Instant;
 import java.util.List;
@@ -13,15 +13,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FilmDTO {
     private long id;
-    
+
     private String name;
-   
+
     private String studio;
-   
+
     private String thumbnail;
 
     private String slider;
-    
+
     private String description;
 
     private int releaseYear;
@@ -31,6 +31,6 @@ public class FilmDTO {
     private Set<CategoryDTO> categories;
     private List<SeasonDTO> seasons;
     private Set<TagDTO> tags;
-    
+
     private Instant uploadDate;
 }

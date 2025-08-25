@@ -25,5 +25,5 @@ server:
 #config upload file
 hieupham:
   upload-file:
-    base-uri: file:///D:/WhatWeDone-Will/AniHoyo-ReactSpring-restfulService/storage/
+    base-uri: file:///D:/WhatWeDone-Will/AniHoyo-RestfulService/storage/
   ffmpeg-path: C:\ffmpeg\bin\ffmpeg.exe

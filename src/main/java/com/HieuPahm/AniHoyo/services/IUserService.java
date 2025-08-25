@@ -2,10 +2,11 @@ package com.HieuPahm.AniHoyo.services;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
-import com.HieuPahm.AniHoyo.dtos.auth.UpdateUserDTO;
-import com.HieuPahm.AniHoyo.dtos.auth.UserDTO;
-import com.HieuPahm.AniHoyo.entities.User;
+
+import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
+import com.HieuPahm.AniHoyo.model.dtos.auth.UpdateUserDTO;
+import com.HieuPahm.AniHoyo.model.dtos.auth.UserDTO;
+import com.HieuPahm.AniHoyo.model.entities.User;
 import com.HieuPahm.AniHoyo.utils.error.BadActionException;
 
 public interface IUserService {

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.HieuPahm.AniHoyo.entities.Episode;
+import com.HieuPahm.AniHoyo.model.entities.Episode;
 import com.HieuPahm.AniHoyo.repository.EpisodeRepository;
 import com.HieuPahm.AniHoyo.services.implement.EpisodeService;
 import com.HieuPahm.AniHoyo.services.implement.FileServiceImpl;
@@ -45,6 +45,13 @@ public class StreamController {
         this.fileServiceImpl = fileServiceImpl;
     }
 
+    // Test endpoint to verify CORS
+    @GetMapping("/test-cors")
+    public ResponseEntity<String> testCors() {
+        return ResponseEntity.ok("CORS is working!");
+    }
+
+    // Basic streaming ===> can not handle video resolutions
     @GetMapping("/stream/range/{id}")
     public ResponseEntity<?> streamVideoRange(
             @PathVariable("id") long id,
@@ -60,19 +67,16 @@ public class StreamController {
         if (!Files.exists(path)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-
         String contentType = episode.get().getContentType();
         if (contentType == null) {
             contentType = "application/octet-stream";
         }
-
         long fileLength;
         try {
             fileLength = Files.size(path);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
         // nếu client không gửi range thì trả nguyên file
         if (range == null) {
             Resource resource = new FileSystemResource(path);
@@ -128,6 +132,7 @@ public class StreamController {
         }
     }
 
+    // HLS - Adaptive streaming
     @GetMapping("/{id}/master.m3u8")
     public ResponseEntity<Resource> serverMasterFile(
             @PathVariable("id") long id) {
@@ -135,9 +140,15 @@ public class StreamController {
         if (episode.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        Path path = Paths.get(baseURI, episode.get().getTitle(), "master.m3u8");
+        URI uri = URI.create(baseURI + "videos_hls/" + episode.get().getTitle() + "/master.m3u8");
+        Path path = Paths.get(uri);
+
+        System.out.println("Debug - Episode ID: " + id);
+        System.out.println("Debug - Episode Title: " + episode.get().getTitle());
+        System.out.println("Debug - Base URI: " + baseURI);
 
         if (!Files.exists(path)) {
+            System.out.println("Debug - File not found at: " + path);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Resource resource = new FileSystemResource(path);
@@ -149,24 +160,70 @@ public class StreamController {
     }
 
     // serve the segments
-    @GetMapping("/{id}/{segment}.ts")
+    @GetMapping("/{id}/{quality}/{segment}.ts")
     public ResponseEntity<Resource> serveSegments(
             @PathVariable("id") long id,
+            @PathVariable String quality,
             @PathVariable String segment) {
         Optional<Episode> episode = this.episodeRepository.findById(id);
         if (episode.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        // create path for segment
-        Path path = Paths.get(baseURI, episode.get().getTitle(), segment + ".ts");
+
+        // Validate quality parameter (should end with 'p' like 360p, 720p, 1080p)
+        if (!quality.endsWith("p") || !quality.matches("\\d+p")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        // create path for segment with quality folder
+        URI uri = URI
+                .create(baseURI + "videos_hls/" + episode.get().getTitle() + "/" + quality + "/" + segment + ".ts");
+        Path path = Paths.get(uri);
+
+        System.out.println("Debug - Segment path: " + path);
+
         if (!Files.exists(path)) {
+            System.out.println("Debug - Segment file not found at: " + path);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Resource resource = new FileSystemResource(path);
-
         return ResponseEntity
                 .ok()
                 .header(HttpHeaders.CONTENT_TYPE, "video/mp2t")
+                .body(resource);
+    }
+
+    // serve quality-specific playlist files (360p/index.m3u8, 720p/index.m3u8,
+    // etc.)
+    @GetMapping("/{id}/{quality}/index.m3u8")
+    public ResponseEntity<Resource> serveQualityPlaylist(
+            @PathVariable("id") long id,
+            @PathVariable String quality) {
+        Optional<Episode> episode = this.episodeRepository.findById(id);
+        if (episode.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // Validate quality parameter (should end with 'p' like 360p, 720p, 1080p)
+        if (!quality.endsWith("p") || !quality.matches("\\d+p")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        // create path for quality playlist
+        URI uri = URI.create(baseURI + "videos_hls/" + episode.get().getTitle() + "/" + quality + "/index.m3u8");
+        Path path = Paths.get(uri);
+
+        System.out.println("Debug - Quality playlist path: " + path);
+
+        if (!Files.exists(path)) {
+            System.out.println("Debug - Quality playlist file not found at: " + path);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Resource resource = new FileSystemResource(path);
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.CONTENT_TYPE, "application/vnd.apple.mpegurl")
                 .body(resource);
     }
 }

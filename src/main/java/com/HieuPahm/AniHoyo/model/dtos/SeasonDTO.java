@@ -1,10 +1,10 @@
-package com.HieuPahm.AniHoyo.dtos;
+package com.HieuPahm.AniHoyo.model.dtos;
 
 import java.time.Instant;
 import java.util.List;
 
-import com.HieuPahm.AniHoyo.entities.Episode;
-import com.HieuPahm.AniHoyo.entities.Film;
+import com.HieuPahm.AniHoyo.model.entities.Episode;
+import com.HieuPahm.AniHoyo.model.entities.Film;
 import com.HieuPahm.AniHoyo.utils.constant.GenersEnum;
 
 import lombok.AllArgsConstructor;

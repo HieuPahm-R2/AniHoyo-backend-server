@@ -10,10 +10,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.HieuPahm.AniHoyo.dtos.CategoryDTO;
-import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
-import com.HieuPahm.AniHoyo.entities.Category;
-import com.HieuPahm.AniHoyo.entities.Film;
+import com.HieuPahm.AniHoyo.model.dtos.CategoryDTO;
+import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
+import com.HieuPahm.AniHoyo.model.entities.Category;
+import com.HieuPahm.AniHoyo.model.entities.Film;
 import com.HieuPahm.AniHoyo.repository.CategoryRepository;
 import com.HieuPahm.AniHoyo.repository.FilmRepository;
 import com.HieuPahm.AniHoyo.services.ICategoryService;
@@ -51,7 +51,7 @@ public class CategoryService implements ICategoryService {
     @Override
     public void delete(Long id) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Not Found"));
-        Set<Film> listFilms = category.getFilmList();
+        Set<Film> listFilms = category.getFilms();
         listFilms.forEach(item -> item.getCategories().remove(category));
         filmRepository.saveAll(listFilms);
         categoryRepository.deleteById(id);

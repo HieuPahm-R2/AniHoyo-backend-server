@@ -1,14 +1,13 @@
-package com.HieuPahm.AniHoyo.dtos;
-
+package com.HieuPahm.AniHoyo.model.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class TagDTO {
+public class CategoryDTO {
     private Long id;
-    private String tagName;
+    private String name;
 }

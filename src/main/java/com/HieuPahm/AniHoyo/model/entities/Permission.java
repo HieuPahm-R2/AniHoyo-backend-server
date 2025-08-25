@@ -1,66 +1,61 @@
-package com.HieuPahm.AniHoyo.entities;
+package com.HieuPahm.AniHoyo.model.entities;
 
 import java.time.Instant;
+import java.util.List;
 
 import com.HieuPahm.AniHoyo.utils.SecurityUtils;
-import com.HieuPahm.AniHoyo.utils.constant.GenersEnum;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
-@Table(name = "users")
-public class User {
+@Table(name = "permissions")
+@NoArgsConstructor
+public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @NotBlank(message = "Name not be blank..")
-    private String fullName;
 
-    @NotBlank(message = "Email not be blank..")
-    @Column(unique = true)
-    private String email;
-
-    @NotBlank(message = "Password not be blank..")
-    private String password;
-
-    private String avatar;
+    @NotBlank(message = "Not to blank this field")
+    private String name;
+    @NotBlank(message = "Not to blank this field")
+    private String apiPath;
+    @NotBlank(message = "Not to blank this field")
+    private String method;
+    @NotBlank(message = "Not to blank this field")
+    private String module;
 
     private Instant createdTime;
     private Instant updatedTime;
-
     private String createdBy;
     private String updatedBy;
 
-    @Column(columnDefinition = "MEDIUMTEXT")
-    private String refreshToken;
+    // handle for Auto create new user with sample permission
+    public Permission(String name, String apiPath, String method, String module) {
+        this.name = name;
+        this.apiPath = apiPath;
+        this.method = method;
+        this.module = module;
+    }
 
-    // db relationship
-    @ManyToOne
-    @JoinColumn(name = "role_id")
-    private Role role;
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "permissions")
+    @JsonIgnore
+    private List<Role> roles;
 
-    // ===============
     @PrePersist
     public void handleBeforeCreate() {
         this.createdBy = SecurityUtils.getCurrentUserLogin().isPresent() == true

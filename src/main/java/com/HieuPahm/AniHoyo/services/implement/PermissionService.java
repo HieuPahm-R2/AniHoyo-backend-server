@@ -7,8 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.HieuPahm.AniHoyo.dtos.PaginationResultDTO;
-import com.HieuPahm.AniHoyo.entities.Permission;
+import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
+import com.HieuPahm.AniHoyo.model.entities.Permission;
 import com.HieuPahm.AniHoyo.repository.PermissionRepository;
 import com.HieuPahm.AniHoyo.services.IPermissionServic;
 import com.HieuPahm.AniHoyo.utils.error.BadActionException;
@@ -85,5 +85,14 @@ public class PermissionService implements IPermissionServic {
     @Override
     public boolean isEqualName(String s) {
         return this.permissionRepository.existsByName(s);
+    }
+
+    @Override
+    public Permission getById(Long id) throws BadActionException {
+        Optional<Permission> check = this.permissionRepository.findById(id);
+        if (check.isEmpty()) {
+            throw new BadActionException("Not Found");
+        }
+        return check.get();
     }
 }
