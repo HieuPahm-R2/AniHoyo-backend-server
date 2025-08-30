@@ -34,7 +34,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/user-create")
+    @PostMapping("/add-user")
     @MessageApi("create new account action")
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody User dataUser) throws BadActionException {
         // User accUser = this.userService.handleCreateUser(dataUser);
@@ -54,7 +54,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.getInfo(id));
     }
 
-    @DeleteMapping("/user/{id}")
+    @DeleteMapping("/delete-user/{id}")
     @MessageApi("Delete acction")
     public ResponseEntity<Void> deleteUser(@PathVariable("id") long id) throws BadActionException {
         this.userService.delete(id);

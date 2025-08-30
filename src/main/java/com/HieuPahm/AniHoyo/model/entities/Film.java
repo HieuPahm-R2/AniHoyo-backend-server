@@ -54,7 +54,7 @@ public class Film {
     @ManyToMany(fetch = FetchType.LAZY)
     @JsonIgnoreProperties(value = { "films" })
     @JoinTable(name = "film_category", joinColumns = @JoinColumn(name = "film_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
-    private Set<Category> categories = new HashSet<>();
+    private Set<Category> categories;
 
     @OneToMany(mappedBy = "film", fetch = FetchType.LAZY)
     @JsonIgnore

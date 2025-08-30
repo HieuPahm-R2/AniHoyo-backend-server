@@ -22,12 +22,6 @@ public class FilmDTO {
 
     private String slider;
 
-    private String description;
-
-    private int releaseYear;
-
-    private boolean status;
-
     private Set<CategoryDTO> categories;
     private List<SeasonDTO> seasons;
     private Set<TagDTO> tags;

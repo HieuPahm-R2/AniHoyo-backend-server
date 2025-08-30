@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.HieuPahm.AniHoyo.utils.SecurityUtils;
 import com.HieuPahm.AniHoyo.utils.constant.GenersEnum;
+import com.HieuPahm.AniHoyo.utils.constant.StatusEnum;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
@@ -39,8 +40,12 @@ public class Season {
     @Column(columnDefinition = "nvarchar(150)")
     private String seasonName;
     private String thumb;
+    private String trailer;
+    private Long viewCount;
     private Integer releaseYear;
+
     private Instant uploadDate;
+
     @Column(columnDefinition = "nvarchar(4000)")
     private String description;
 
@@ -49,6 +54,9 @@ public class Season {
 
     @Enumerated(EnumType.STRING)
     private GenersEnum type;
+
+    @Enumerated(EnumType.STRING)
+    private StatusEnum status;
 
     @ManyToOne
     @JoinColumn(name = "film_id")

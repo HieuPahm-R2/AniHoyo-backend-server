@@ -12,10 +12,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.HieuPahm.AniHoyo.model.dtos.CategoryDTO;
 import com.HieuPahm.AniHoyo.model.dtos.FilmDTO;
 import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
-import com.HieuPahm.AniHoyo.model.dtos.TagDTO;
+import com.HieuPahm.AniHoyo.model.entities.Category;
+import com.HieuPahm.AniHoyo.model.entities.Tag;
 import com.HieuPahm.AniHoyo.model.entities.Film;
 import com.HieuPahm.AniHoyo.model.entities.Season;
 import com.HieuPahm.AniHoyo.repository.CategoryRepository;
@@ -46,19 +46,20 @@ public class FilmService implements IFilmService {
 
     @Override
     public FilmDTO insert(FilmDTO dto) {
+        Film film = modelMapper.map(dto, Film.class);
         if (dto.getCategories() != null) {
             List<Long> reqCategory = dto.getCategories().stream().map(item -> item.getId())
                     .collect(Collectors.toList());
-            Set<CategoryDTO> mainCategory = this.categoryRepository.findByIdIn(reqCategory);
-            dto.setCategories(mainCategory);
+            Set<Category> mainCategory = this.categoryRepository.findByIdIn(reqCategory);
+            film.setCategories(mainCategory);
         }
         if (dto.getTags() != null) {
             List<Long> reqTag = dto.getTags().stream().map(item -> item.getId()).collect(Collectors.toList());
-            Set<TagDTO> mainTag = this.tagRepository.findByIdIn(reqTag);
-            dto.setTags(mainTag);
+            Set<Tag> mainTag = this.tagRepository.findByIdIn(reqTag);
+            film.setTags(mainTag);
         }
         return modelMapper.map(
-                filmRepository.save(modelMapper.map(dto, Film.class)), FilmDTO.class);
+                filmRepository.save(film), FilmDTO.class);
     }
 
     @Override

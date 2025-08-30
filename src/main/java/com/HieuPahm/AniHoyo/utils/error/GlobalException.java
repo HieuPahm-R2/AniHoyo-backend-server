@@ -48,15 +48,15 @@ public class GlobalException {
         res.setMessage("Oops!!, 404 Not found... URL may be not exist");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
-    // @ExceptionHandler(value = {
-    // InternalError.class,
-    // })
-    // public ResponseEntity<RestResponse<Object>> handleServerException(Exception
-    // ex){
-    // RestResponse<Object> res = new RestResponse<>();
-    // res.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-    // res.setError(ex.getMessage());
-    // res.setMessage("Oops!!, Server got some Ufo... please get back later!");
-    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
-    // }
+
+    @ExceptionHandler(value = {
+            ForbidenException.class
+    })
+    public ResponseEntity<RestResponse<Object>> handlePermissionException(Exception ex) {
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatusCode(HttpStatus.FORBIDDEN.value());
+        res.setError(ex.getMessage());
+        res.setMessage("YOU DON'T HAVE ANY AUTHORIZATION TO ACCESS...");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
 }
