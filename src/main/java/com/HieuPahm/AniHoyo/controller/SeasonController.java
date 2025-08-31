@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
@@ -22,6 +23,8 @@ import com.HieuPahm.AniHoyo.utils.error.BadActionException;
 import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -67,5 +70,17 @@ public class SeasonController {
     @MessageApi("fetch all seasons of film")
     public ResponseEntity<PaginationResultDTO> fetchSeasonsByFilm(@PathVariable Long filmId, Pageable pageable) {
         return ResponseEntity.ok().body(this.seasonService.fetchSeasonsByFilm(filmId, pageable));
+    }
+
+    @GetMapping("/seasons/top-views")
+    @MessageApi("fetch top 5 seasons by views")
+    public ResponseEntity<List<SeasonDTO>> getTop5SeasonsByViews() {
+        return ResponseEntity.ok().body(this.seasonService.getTop5SeasonsByViews());
+    }
+
+    @PostMapping("/{id}/view")
+    public ResponseEntity<Void> increaseView(@PathVariable Long id, @RequestParam String sessionId) {
+        seasonService.increaseViewOnce(id, sessionId); // Chống spam
+        return ResponseEntity.ok().build();
     }
 }

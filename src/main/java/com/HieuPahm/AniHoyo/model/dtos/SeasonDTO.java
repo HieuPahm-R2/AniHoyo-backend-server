@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 public class SeasonDTO {
     private Long id;
     private String seasonName;
+    private String ordinal;
     private String thumb;
     private String description;
     private Integer releaseYear;

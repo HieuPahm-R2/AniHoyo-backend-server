@@ -33,7 +33,7 @@ public class SecurityConfiguration {
         public SecurityFilterChain filterChain(HttpSecurity http, AuthEntryPointConfig authEntryPointConfig)
                         throws Exception {
                 String[] whileList = {
-                                "/",
+                                "/", "/api/v1/",
                                 "/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/register",
                                 "/api/v1/stream/range/**",
                                 "/storage/**",
@@ -47,17 +47,19 @@ public class SecurityConfiguration {
                                 .authorizeHttpRequests(
                                                 authz -> authz
                                                                 .requestMatchers(whileList).permitAll()
+                                                                .requestMatchers(HttpMethod.POST,
+                                                                                "/api/v1/*/view/**")
+                                                                .permitAll()
                                                                 .requestMatchers(HttpMethod.GET,
                                                                                 "/api/v1/*/master.m3u8")
                                                                 .permitAll()
                                                                 .requestMatchers(HttpMethod.GET, "/api/v1/*/*.ts")
                                                                 .permitAll()
-                                                                // Quality-specific playlist files (360p/index.m3u8,
-                                                                // 720p/index.m3u8, etc.)
+                                                                // Quality-specific playlist files
                                                                 .requestMatchers(HttpMethod.GET,
                                                                                 "/api/v1/*/*/index.m3u8")
                                                                 .permitAll()
-                                                                // HLS segments with quality folder (*/quality/*.ts)
+                                                                // HLS segments with quality folder
                                                                 .requestMatchers(HttpMethod.GET,
                                                                                 "/api/v1/*/*/*.ts")
                                                                 .permitAll()

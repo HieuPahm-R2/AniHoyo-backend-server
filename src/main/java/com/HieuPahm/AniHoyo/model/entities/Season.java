@@ -39,6 +39,7 @@ public class Season {
     private long id;
     @Column(columnDefinition = "nvarchar(150)")
     private String seasonName;
+    private String ordinal;
     private String thumb;
     private String trailer;
     private Long viewCount;

@@ -1,8 +1,11 @@
 package com.HieuPahm.AniHoyo.services.implement;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -14,9 +17,11 @@ import org.springframework.stereotype.Service;
 
 import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
 import com.HieuPahm.AniHoyo.model.dtos.SeasonDTO;
+import com.HieuPahm.AniHoyo.model.entities.Episode;
 import com.HieuPahm.AniHoyo.model.entities.Film;
 import com.HieuPahm.AniHoyo.model.entities.Permission;
 import com.HieuPahm.AniHoyo.model.entities.Season;
+import com.HieuPahm.AniHoyo.repository.EpisodeRepository;
 import com.HieuPahm.AniHoyo.repository.FilmRepository;
 import com.HieuPahm.AniHoyo.repository.SeasonRepository;
 import com.HieuPahm.AniHoyo.services.ISeasonService;
@@ -36,15 +41,19 @@ public class SeasonService implements ISeasonService {
     @Autowired
     private FilterSpecificationConverter filterSpecificationConverter;
 
+    private Set<String> sessionViewCache = Collections.synchronizedSet(new HashSet<>());
+
     private final ModelMapper modelMapper;
     private final SeasonRepository seasonRepository;
     private final FilmRepository filmRepository;
+    private final EpisodeRepository episodeRepository;
 
     public SeasonService(ModelMapper modelMapper, SeasonRepository seasonRepository,
-            FilmRepository filmRepository) {
+            FilmRepository filmRepository, EpisodeRepository episodeRepository) {
         this.modelMapper = modelMapper;
         this.seasonRepository = seasonRepository;
         this.filmRepository = filmRepository;
+        this.episodeRepository = episodeRepository;
     }
 
     @Override
@@ -120,5 +129,26 @@ public class SeasonService implements ISeasonService {
         rs.setMeta(mt);
         rs.setResult(page.getContent());
         return rs;
+    }
+
+    public List<SeasonDTO> getTop5SeasonsByViews() {
+        List<Season> topSeasons = seasonRepository.findTop5ByOrderByViewCountDesc();
+        return topSeasons.stream()
+                .map(season -> modelMapper.map(season, SeasonDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    public void increaseViewOnce(Long ssId, String sessionId) {
+        String key = ssId + "-" + sessionId;
+        if (sessionViewCache.contains(key))
+            return; // đã tăng``
+
+        Episode ep = episodeRepository.findById(ssId)
+                .orElseThrow(() -> new NoSuchElementException("Not found"));
+        Season season = ep.getSeason();
+        season.setViewCount(season.getViewCount() + 1);
+        seasonRepository.save(season);
+        sessionViewCache.add(key);
+        // (Redis thì ngon hơn)
     }
 }

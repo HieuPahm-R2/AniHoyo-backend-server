@@ -10,4 +10,6 @@ import com.HieuPahm.AniHoyo.model.entities.Season;
 
 public interface SeasonRepository extends JpaRepository<Season, Long>, JpaSpecificationExecutor<Season> {
     List<Season> findByFilm(Film film);
+
+    List<Season> findTop5ByOrderByViewCountDesc();
 }

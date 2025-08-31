@@ -49,7 +49,9 @@ public class DatabaseInitializer implements CommandLineRunner {
             arrResult.add(new Permission("Delete a season ", "/api/v1/delete-season/{id}", "DELETE", "SEASONS"));
             arrResult.add(new Permission("Get season by id", "/api/v1/season/{id}", "GET", "SEASONS"));
             arrResult.add(new Permission("Get seasons with pagination", "/api/v1/seasons", "GET", "SEASONS"));
-            arrResult.add(new Permission("fetch all seasons of film", "/seasons/by-film/{filmId}", "GET", "SEASONS"));
+            arrResult.add(
+                    new Permission("fetch all seasons of film", "/api/v1/seasons/by-film/{filmId}", "GET", "SEASONS"));
+            arrResult.add(new Permission("fetch top 5 of film", "/api/v1/seasons/top-views", "GET", "SEASONS"));
 
             arrResult.add(new Permission("Create a tag", "/api/v1/add-tag", "POST", "TAGS"));
             arrResult.add(new Permission("Update a tag", "/api/v1/update-tag", "PUT", "TAGS"));
