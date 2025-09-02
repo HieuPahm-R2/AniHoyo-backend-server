@@ -67,6 +67,10 @@ public class Season {
     @JsonIgnore
     private List<Episode> episodes;
 
+    @OneToMany(mappedBy = "season", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Rating> rates;
+
     @PrePersist
     public void handleBeforeCreate() {
         this.createdBy = SecurityUtils.getCurrentUserLogin().isPresent() == true

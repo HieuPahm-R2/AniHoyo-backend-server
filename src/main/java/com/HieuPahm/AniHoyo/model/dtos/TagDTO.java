@@ -10,4 +10,8 @@ import lombok.NoArgsConstructor;
 public class TagDTO {
     private Long id;
     private String tagName;
+
+    public TagDTO(Long id) {
+        this.id = id;
+    }
 }
