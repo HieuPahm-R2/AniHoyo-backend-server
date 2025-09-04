@@ -16,5 +16,5 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
     List<Rating> findBySeasonId(Long movieId);
 
     @Query("SELECT AVG(r.stars) FROM Rating r WHERE r.season.id = :seasonId")
-    Double getAverageRating(@Param("movieId") Long seasonId);
+    Double getAverageRating(@Param("seasonId") Long seasonId);
 }
