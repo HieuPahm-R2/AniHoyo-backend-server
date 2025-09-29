@@ -18,6 +18,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,11 +32,11 @@ import lombok.Setter;
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "season_id", nullable = false)
-    private Season movie;
+    private Season season;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -45,6 +46,9 @@ public class Comment {
     @JoinColumn(name = "parent_id")
     private Comment parent;
 
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<CommentReact> reacts = new ArrayList<>();
+
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> replies = new ArrayList<>();
 
@@ -53,6 +57,13 @@ public class Comment {
 
     private Instant createdAt = Instant.now();
     private Instant updatedAt;
+
+    public Comment(Season season, User user, String content, Comment parent) {
+        this.season = season;
+        this.user = user;
+        this.content = content;
+        this.parent = parent;
+    }
 
     @PreUpdate
     public void onUpdate() {

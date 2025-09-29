@@ -21,7 +21,7 @@ anihoyo:
     access-token-validity-in-seconds: 8640
     refresh-token-validity-in-seconds: 864000
 server:
-  port: 8083  
+  port: 8083
 #config upload file
 hieupham:
   upload-file:

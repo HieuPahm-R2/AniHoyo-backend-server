@@ -14,6 +14,7 @@ public class UserDTO {
     private long id;
     private String fullName;
     private String email;
+    private String avatar;
     private String refreshToken;
 
     private Instant updatedTime;

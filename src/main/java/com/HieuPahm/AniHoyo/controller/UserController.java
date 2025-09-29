@@ -55,8 +55,8 @@ public class UserController {
     }
 
     @DeleteMapping("/delete-user/{id}")
-    @MessageApi("Delete acction")
-    public ResponseEntity<Void> deleteUser(@PathVariable("id") long id) throws BadActionException {
+    @MessageApi("Delete action")
+    public ResponseEntity<Void> deleteUser(@PathVariable long id) throws BadActionException {
         this.userService.delete(id);
         return ResponseEntity.ok(null);
     }

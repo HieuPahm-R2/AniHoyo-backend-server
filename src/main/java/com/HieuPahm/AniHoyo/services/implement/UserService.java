@@ -66,6 +66,7 @@ public class UserService implements IUserService {
         }
         currentUser.get().setFullName(data.getFullName());
         currentUser.get().setEmail(data.getEmail());
+        currentUser.get().setAvatar(data.getAvatar());
         if (data.getRole() != null) {
             Optional<Role> res = this.roleRepository.findById(data.getRole().getId());
             currentUser.get().setRole(res.isPresent() ? res.get() : null);

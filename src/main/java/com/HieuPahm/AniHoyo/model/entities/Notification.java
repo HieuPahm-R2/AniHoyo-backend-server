@@ -13,11 +13,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "notifications")
 public class Notification {
@@ -28,8 +30,8 @@ public class Notification {
     private Long receiverId;
     private Long senderId;
 
-    @Enumerated(EnumType.STRING)
-    private NotificationEnum type;
+    // @Enumerated(EnumType.STRING)
+    private String type;
 
     private String message;
     private Boolean isRead = false;

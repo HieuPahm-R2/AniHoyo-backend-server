@@ -40,7 +40,7 @@ public class AuthEntryPointConfig implements AuthenticationEntryPoint {
                     .orElse(authException.getMessage());
 
         res.setError(errorMess);
-        res.setMessage("Token không hợp lệ !! (có thể do sai định dạng hoặc hết hạn)");
+        res.setMessage("Token not valid !! (có thể do sai định dạng hoặc hết hạn)");
         mapper.writeValue(response.getWriter(), res);
     }
 }

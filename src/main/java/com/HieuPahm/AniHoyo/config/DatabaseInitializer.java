@@ -93,6 +93,12 @@ public class DatabaseInitializer implements CommandLineRunner {
             arrResult.add(new Permission("Upload video", "/api/v1/upload/video", "POST", "EPISODES"));
             arrResult.add(new Permission("Upload file", "/api/v1/files", "POST", "FILES"));
 
+            arrResult.add(new Permission("Post a comment", "/api/v1/comments/post/{ssId}", "POST", "COMMENTS"));
+            arrResult.add(new Permission("Read comments", "/api/v1/comments/{ssId}", "GET", "COMMENTS"));
+            arrResult.add(
+                    new Permission("Reply a comment", "/api/v1/comments/{ssId}/{parentId}/reply", "POST", "COMMENTS"));
+            arrResult.add(new Permission("React to comment", "/api/v1/comments/{commentId}/like", "POST", "COMMENTS"));
+
             this.permissionRepository.saveAll(arrResult);
         }
         if (countRole == 0) {

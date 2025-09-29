@@ -15,7 +15,7 @@ public class InterceptorConfiguration implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         String[] whiteList = {
-                "/", "/api/v1/auth/**", "/storage/**",
+                "/", "/api/v1/auth/**", "/storage/**", "/api/v1/notifications/**",
                 "/api/v1/files", "/api/v1/ratings/**", "/api/v1/ratings/average/**"
         };
         registry.addInterceptor(getAuthorityInterceptor()).excludePathPatterns(whiteList);
