@@ -28,6 +28,10 @@ public class SecurityUtils {
     public static final MacAlgorithm JWT_ALGORITHM = MacAlgorithm.HS512;
     private final JwtEncoder jwtEncoder;
 
+    public SecurityUtils(JwtEncoder jwtEncoder) {
+        this.jwtEncoder = jwtEncoder;
+    }
+
     @Value("${anihoyo.jwt.base64-secret}")
     private String jwtKey;
 
@@ -35,10 +39,6 @@ public class SecurityUtils {
     private long accessTokenExpire;
     @Value("${anihoyo.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpire;
-
-    public SecurityUtils(JwtEncoder jwtEncoder) {
-        this.jwtEncoder = jwtEncoder;
-    }
 
     /**
      * Get the login of the current user.
@@ -79,7 +79,6 @@ public class SecurityUtils {
         }
     }
 
-    // =========================
     public String generateAccessToken(String email, ResLoginDTO user) {
         ResLoginDTO.InfoWithinToken token = new ResLoginDTO.InfoWithinToken();
         token.setId(user.getUser().getId());
@@ -99,6 +98,7 @@ public class SecurityUtils {
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
     }
+    
     public String generateRefreshToken(String emailLogin, ResLoginDTO resLoginDTO){
         ResLoginDTO.InfoWithinToken data = new ResLoginDTO.InfoWithinToken();
         data.setId(resLoginDTO.getUser().getId());

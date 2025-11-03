@@ -1,7 +1,6 @@
 package com.HieuPahm.AniHoyo.model.dtos.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.HieuPahm.AniHoyo.model.dtos.auth.RoleDTO;
 import com.HieuPahm.AniHoyo.model.entities.Role;
 
 import lombok.AllArgsConstructor;
