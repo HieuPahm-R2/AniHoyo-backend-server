@@ -1,25 +1,27 @@
 package com.HieuPahm.AniHoyo.services.implement;
 
+import java.time.Duration;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
 import com.HieuPahm.AniHoyo.model.dtos.SeasonDTO;
 import com.HieuPahm.AniHoyo.model.entities.Episode;
 import com.HieuPahm.AniHoyo.model.entities.Film;
-import com.HieuPahm.AniHoyo.model.entities.Permission;
 import com.HieuPahm.AniHoyo.model.entities.Season;
 import com.HieuPahm.AniHoyo.repository.EpisodeRepository;
 import com.HieuPahm.AniHoyo.repository.FilmRepository;
@@ -40,8 +42,8 @@ public class SeasonService implements ISeasonService {
     private FilterParser filterParser;
     @Autowired
     private FilterSpecificationConverter filterSpecificationConverter;
-
-    private Set<String> sessionViewCache = Collections.synchronizedSet(new HashSet<>());
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     private final ModelMapper modelMapper;
     private final SeasonRepository seasonRepository;
@@ -69,6 +71,7 @@ public class SeasonService implements ISeasonService {
     }
 
     @Override
+    @Cacheable(value = "seasons", key = "#id")
     public SeasonDTO getById(Long id) {
         return this.modelMapper.map(
                 this.seasonRepository.findById(id).orElseThrow(
@@ -77,6 +80,10 @@ public class SeasonService implements ISeasonService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "seasons", key = "#dto.id"),
+            @CacheEvict(value = "relatedSeasons", allEntries = true)
+    })
     public SeasonDTO update(SeasonDTO dto) throws BadActionException {
         Optional<Season> check = this.seasonRepository.findById(dto.getId());
         if (check.isEmpty()) {
@@ -90,12 +97,16 @@ public class SeasonService implements ISeasonService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "seasons", key = "#id"),
+            @CacheEvict(value = "relatedSeasons", allEntries = true),
+            @CacheEvict(value = "topSeasons", allEntries = true)
+    })
     public void delete(Long id) {
         this.seasonRepository.deleteById(id);
     }
 
     public PaginationResultDTO fetchSeasonsByFilm(Long filmId, Pageable pageable) {
-        // Tạo filter để lấy season theo filmId
         FilterNode node = filterParser.parse("film.id=" + filmId);
         FilterSpecification<Season> spec = filterSpecificationConverter.convert(node);
         Page<Season> pageCheck = this.seasonRepository.findAll(spec, pageable);
@@ -131,6 +142,18 @@ public class SeasonService implements ISeasonService {
         return rs;
     }
 
+    @Cacheable(value = "relatedSeasons", key = "#seasonId")
+    public List<SeasonDTO> getRelatedSeasons(Long seasonId) {
+        Season season = this.seasonRepository.findById(seasonId)
+                .orElseThrow(() -> new NoSuchElementException("Season Not Found"));
+        Film film = season.getFilm();
+        if (film == null) return Collections.emptyList();
+        return this.seasonRepository.findByFilm(film).stream()
+                .map(s -> modelMapper.map(s, SeasonDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Cacheable(value = "topSeasons", key = "'top5'")
     public List<SeasonDTO> getTop5SeasonsByViews() {
         List<Season> topSeasons = seasonRepository.findTop5ByOrderByViewCountDesc();
         return topSeasons.stream()
@@ -138,17 +161,25 @@ public class SeasonService implements ISeasonService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Increases the view count at most once per session per episode.
+     * Uses Redis SETNX with a 24-hour TTL to deduplicate across restarts and nodes.
+     */
+    @CacheEvict(value = "topSeasons", allEntries = true)
     public void increaseViewOnce(Long ssId, String sessionId) {
-        String key = ssId + "-" + sessionId;
-        if (sessionViewCache.contains(key))
-            return; // đã tăng``
+        String viewKey = "view:" + ssId + ":" + sessionId;
+        Boolean isNew = redisTemplate.opsForValue().setIfAbsent(viewKey, "1", Duration.ofHours(24));
+        if (Boolean.FALSE.equals(isNew)) {
+            return; // already counted for this session
+        }
 
         Episode ep = episodeRepository.findById(ssId)
                 .orElseThrow(() -> new NoSuchElementException("Not found"));
         Season season = ep.getSeason();
         season.setViewCount(season.getViewCount() + 1);
         seasonRepository.save(season);
-        sessionViewCache.add(key);
-        // (Redis thì ngon hơn)
+
+        // Evict the cached season entry so the new view count is visible
+        redisTemplate.delete("seasons::" + season.getId());
     }
 }

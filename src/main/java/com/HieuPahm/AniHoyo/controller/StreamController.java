@@ -134,8 +134,7 @@ public class StreamController {
 
     // HLS - Adaptive streaming
     @GetMapping("/{id}/master.m3u8")
-    public ResponseEntity<Resource> serverMasterFile(
-            @PathVariable("id") long id) {
+    public ResponseEntity<Resource> serverMasterFile(@PathVariable("id") long id) {
         Optional<Episode> episode = this.episodeRepository.findById(id);
         if (episode.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

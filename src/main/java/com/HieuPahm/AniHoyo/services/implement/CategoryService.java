@@ -1,10 +1,12 @@
 package com.HieuPahm.AniHoyo.services.implement;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -33,22 +35,27 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public CategoryDTO insert(CategoryDTO dto) {
-
         return modelMapper.map(categoryRepository.save(modelMapper.map(dto, Category.class)), CategoryDTO.class);
     }
 
     @Override
+    @Cacheable(value = "categories", key = "#id")
     public CategoryDTO getById(Long id) {
         return modelMapper.map(categoryRepository.findById(id).orElseThrow(
                 () -> new NoSuchElementException("Not Found")), CategoryDTO.class);
     }
 
     @Override
+    @CacheEvict(value = "categories", key = "#dto.id")
     public CategoryDTO update(CategoryDTO dto) {
         return modelMapper.map(categoryRepository.save(modelMapper.map(dto, Category.class)), CategoryDTO.class);
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "categories", key = "#id"),
+            @CacheEvict(value = "films", allEntries = true)
+    })
     public void delete(Long id) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Not Found"));
         Set<Film> listFilms = category.getFilms();
@@ -67,7 +74,6 @@ public class CategoryService implements ICategoryService {
         mt.setPages(pageCheck.getTotalPages());
         mt.setTotal(pageCheck.getTotalElements());
         res.setMeta(mt);
-        // remove sensitive data
         res.setResult(pageCheck.getContent());
         return res;
     }

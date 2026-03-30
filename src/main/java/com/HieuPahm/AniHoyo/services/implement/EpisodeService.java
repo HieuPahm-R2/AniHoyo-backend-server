@@ -17,6 +17,8 @@ import com.turkraft.springfilter.parser.node.FilterNode;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -62,19 +64,20 @@ public class EpisodeService implements IEpisodeService {
 
     @Override
     public EpisodeDTO insert(EpisodeDTO dto) {
-        // process video
         Episode ep = this.episodeRepository.save(modelMapper.map(dto, Episode.class));
         processVideo(ep.getId());
         return modelMapper.map(ep, EpisodeDTO.class);
     }
 
     @Override
+    @Cacheable(value = "episodes", key = "#id")
     public EpisodeDTO getById(Long id) {
         Optional<Episode> ep = this.episodeRepository.findById(id);
         return modelMapper.map(ep.get(), EpisodeDTO.class);
     }
 
     @Override
+    @CacheEvict(value = "episodes", key = "#dto.id")
     public EpisodeDTO update(EpisodeDTO dto) throws BadActionException {
         Optional<Episode> ep = this.episodeRepository.findById(dto.getId());
         if (ep.isPresent()) {
@@ -87,12 +90,12 @@ public class EpisodeService implements IEpisodeService {
     }
 
     @Override
+    @CacheEvict(value = "episodes", key = "#id")
     public void delete(Long id) {
         this.episodeRepository.deleteById(id);
     }
 
     public PaginationResultDTO fetchEpsBySeason(Long seasonId, Pageable pageable) {
-        // Tạo filter để lấy season theo filmId
         FilterNode node = filterParser.parse("season.id=" + seasonId);
         FilterSpecification<Episode> spec = filterSpecificationConverter.convert(node);
         Page<Episode> pageCheck = this.episodeRepository.findAll(spec, pageable);
@@ -129,14 +132,11 @@ public class EpisodeService implements IEpisodeService {
         URI inputUri = URI.create(baseURI + "videos/" + filePath);
         Path inputVideoPath = Paths.get(inputUri);
 
-        // Root output directory for this episode
         Path outputRoot = Paths.get(URI.create(baseURI + "videos_hls/" + episode.getTitle() + "/"));
 
         try {
             Files.createDirectories(outputRoot);
 
-            // Detect source resolution (width x height). Default to 360p when detection
-            // fails
             int sourceWidth = 0;
             int sourceHeight = 0;
             try {
@@ -147,7 +147,6 @@ public class EpisodeService implements IEpisodeService {
                 // keep defaults (0,0) to fall back to 360p only
             }
 
-            // Decide which variants to create
             List<Integer> targetHeights = new ArrayList<>();
             targetHeights.add(360);
             if (sourceHeight >= 720) {
@@ -155,18 +154,15 @@ public class EpisodeService implements IEpisodeService {
                 targetHeights.add(1080);
             }
 
-            // Generate HLS for each target height
             List<String> masterEntries = new ArrayList<>();
             for (Integer height : targetHeights) {
                 Path variantDir = outputRoot.resolve(height + "p");
                 Files.createDirectories(variantDir);
 
-                // Calculate resulting width keeping aspect ratio; ensure even number
                 int outWidth;
                 if (sourceWidth > 0 && sourceHeight > 0) {
                     outWidth = Math.max(2, ((sourceWidth * height) / sourceHeight) & ~1);
                 } else {
-                    // Assume 16:9 when unknown
                     outWidth = Math.max(2, ((16 * height) / 9) & ~1);
                 }
 
@@ -175,7 +171,6 @@ public class EpisodeService implements IEpisodeService {
 
                 runFfmpegToHls(inputVideoPath, segmentPath, playlistPath, height);
 
-                // Estimate bandwidths (very rough defaults)
                 long bandwidth;
                 if (height >= 1080) {
                     bandwidth = 5000000L;
@@ -188,7 +183,6 @@ public class EpisodeService implements IEpisodeService {
                         + "\n" + height + "p/index.m3u8");
             }
 
-            // Write master playlist
             StringBuilder master = new StringBuilder();
             master.append("#EXTM3U\n");
             master.append("#EXT-X-VERSION:3\n");
@@ -227,7 +221,6 @@ public class EpisodeService implements IEpisodeService {
             throw new IOException("ffprobe failed: " + output);
         }
         String result = output.toString().trim();
-        // Expected format: 1920x1080
         String[] parts = result.split("x");
         int width = Integer.parseInt(parts[0].trim());
         int height = Integer.parseInt(parts[1].trim());

@@ -72,7 +72,7 @@ public class AuthController {
         resLoginDTO.setAccessToken(access_token);
         // gen refresh token
         String refresh_token = this.securityUtils.generateRefreshToken(loginData.getUsername(), resLoginDTO);
-        this.userService.saveRefreshToken(access_token, loginData.getUsername());
+        this.userService.saveRefreshToken(refresh_token, loginData.getUsername());
         // setup cookies
         ResponseCookie resCookies = ResponseCookie
                 .from("refresh-token", refresh_token)
@@ -146,7 +146,7 @@ public class AuthController {
         resLoginDTO.setAccessToken(access_token);
         // gen refresh token
         String refresh_token = this.securityUtils.generateRefreshToken(email, resLoginDTO);
-        this.userService.saveRefreshToken(access_token, email);
+        this.userService.saveRefreshToken(refresh_token, email);
         // setup cookies
         ResponseCookie resCookies = ResponseCookie
                 .from("refresh-token", refresh_token)
@@ -156,16 +156,6 @@ public class AuthController {
                 .build();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, resCookies.toString()).body(resLoginDTO);
-    }
-
-    /**
-     * Helper method to convert Role entity to RoleDTO
-     */
-    private RoleDTO convertRoleToRoleDTO(Role role) {
-        if (role == null) {
-            return null;
-        }
-        return new RoleDTO(role.getId(), role.getName(), role.getDescription());
     }
 
     @PostMapping("/auth/logout")

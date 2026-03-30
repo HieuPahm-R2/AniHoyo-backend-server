@@ -6,6 +6,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -59,6 +62,10 @@ public class UserService implements IUserService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "#data.id"),
+            @CacheEvict(value = "userByEmail", key = "#data.email")
+    })
     public UpdateUserDTO update(User data) throws BadActionException {
         Optional<User> currentUser = this.userRepository.findById(data.getId());
         if (!currentUser.isPresent()) {
@@ -76,6 +83,7 @@ public class UserService implements IUserService {
     }
 
     @Override
+    @Cacheable(value = "users", key = "#id")
     public UserDTO getInfo(Long id) {
         return modelMapper.map(this.userRepository.findById(id).orElseThrow(
                 () -> new NoSuchElementException("Not Found!")), UserDTO.class);
@@ -91,7 +99,6 @@ public class UserService implements IUserService {
         mt.setPages(pageCheck.getTotalPages());
         mt.setTotal(pageCheck.getTotalElements());
         res.setMeta(mt);
-        // remove sensitive data
         List<UserDTO> listUser = pageCheck.getContent()
                 .stream().map(item -> this.modelMapper.map(item, UserDTO.class))
                 .collect(Collectors.toList());
@@ -100,6 +107,9 @@ public class UserService implements IUserService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "#id"),
+    })
     public void delete(Long id) throws BadActionException {
         Optional<User> currentUser = this.userRepository.findById(id);
         if (!currentUser.isPresent()) {
@@ -109,6 +119,7 @@ public class UserService implements IUserService {
     }
 
     @Override
+    @CacheEvict(value = "userByEmail", key = "#email")
     public void saveRefreshToken(String token, String email) {
         User currentUser = this.handleGetUserByUsername(email);
         if (currentUser != null) {
@@ -120,6 +131,11 @@ public class UserService implements IUserService {
     @Override
     public User fetchWithTokenAndEmail(String token, String email) {
         return this.userRepository.findByRefreshTokenAndEmail(token, email);
+    }
+
+    @Override
+    public User getUserWithPermissions(String email) {
+        return this.userRepository.findByEmailWithPermissions(email);
     }
 
 }

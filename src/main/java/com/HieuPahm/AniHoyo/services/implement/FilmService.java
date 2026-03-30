@@ -7,6 +7,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -63,18 +66,36 @@ public class FilmService implements IFilmService {
     }
 
     @Override
+    @Cacheable(value = "films", key = "#id")
     public FilmDTO getById(Long id) {
         return modelMapper.map(
                 filmRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Not Found")), FilmDTO.class);
     }
 
     @Override
+    @CacheEvict(value = "films", key = "#dto.id")
     public FilmDTO update(FilmDTO dto) {
-
-        return modelMapper.map(filmRepository.save(modelMapper.map(dto, Film.class)), FilmDTO.class);
+        Film film = modelMapper.map(dto, Film.class);
+        if (dto.getCategories() != null) {
+            List<Long> reqCategory = dto.getCategories().stream().map(item -> item.getId())
+                    .collect(Collectors.toList());
+            Set<Category> mainCategory = this.categoryRepository.findByIdIn(reqCategory);
+            film.setCategories(mainCategory);
+        }
+        if (dto.getTags() != null) {
+            List<Long> reqTag = dto.getTags().stream().map(item -> item.getId()).collect(Collectors.toList());
+            Set<Tag> mainTag = this.tagRepository.findByIdIn(reqTag);
+            film.setTags(mainTag);
+        }
+        return modelMapper.map(filmRepository.save(film), FilmDTO.class);
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "films", key = "#id"),
+            @CacheEvict(value = "relatedSeasons", allEntries = true),
+            @CacheEvict(value = "topSeasons", allEntries = true)
+    })
     public void delete(Long id) {
         Optional<Film> opt = this.filmRepository.findById(id);
         if (opt.isPresent()) {
@@ -95,7 +116,6 @@ public class FilmService implements IFilmService {
         mt.setPages(pageCheck.getTotalPages());
         mt.setTotal(pageCheck.getTotalElements());
         res.setMeta(mt);
-        // remove sensitive data
         res.setResult(pageCheck.getContent());
         return res;
     }

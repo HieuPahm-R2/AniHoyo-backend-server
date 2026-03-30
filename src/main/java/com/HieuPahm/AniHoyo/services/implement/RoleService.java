@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -37,6 +40,7 @@ public class RoleService implements IRoleService {
     }
 
     @Override
+    @CacheEvict(value = "roles", key = "#data.id")
     public Role update(Role data) throws BadActionException {
         if (Long.valueOf(data.getId()) == null || this.roleRepository.findById(data.getId()).isEmpty()) {
             throw new BadActionException("Không tìm thấy bất kỳ thông tin nào, kiểm tra lại?");
@@ -56,6 +60,7 @@ public class RoleService implements IRoleService {
     }
 
     @Override
+    @Cacheable(value = "roles", key = "#id")
     public Role fetchById(Long id) throws BadActionException {
         Optional<Role> check = this.roleRepository.findById(id);
         if (!check.isPresent()) {
@@ -65,6 +70,11 @@ public class RoleService implements IRoleService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "roles", key = "#id"),
+            // Evict all userByEmail entries since roles affect auth decisions
+            @CacheEvict(value = "userByEmail", allEntries = true)
+    })
     public void delete(Long id) throws BadActionException {
         if (this.roleRepository.findById(id).isEmpty()) {
             throw new BadActionException("Không tìm thấy dữ liệu! (Có thể do ID không hợp lệ)");

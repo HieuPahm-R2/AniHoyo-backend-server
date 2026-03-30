@@ -26,4 +26,6 @@ public interface IUserService {
     public void saveRefreshToken(String token, String email);
 
     public User handleGetUserByUsername(String username);
+
+    public User getUserWithPermissions(String email);
 }

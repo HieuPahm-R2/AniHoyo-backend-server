@@ -12,10 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
 import com.HieuPahm.AniHoyo.model.dtos.SeasonDTO;
-import com.HieuPahm.AniHoyo.model.entities.Category;
 import com.HieuPahm.AniHoyo.model.entities.Season;
 import com.HieuPahm.AniHoyo.services.implement.SeasonService;
 import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
@@ -76,6 +74,12 @@ public class SeasonController {
     @MessageApi("fetch top 5 seasons by views")
     public ResponseEntity<List<SeasonDTO>> getTop5SeasonsByViews() {
         return ResponseEntity.ok().body(this.seasonService.getTop5SeasonsByViews());
+    }
+
+    @GetMapping("/seasons/related/{seasonId}")
+    @MessageApi("fetch all seasons of the same film")
+    public ResponseEntity<List<SeasonDTO>> getRelatedSeasons(@PathVariable Long seasonId) {
+        return ResponseEntity.ok().body(this.seasonService.getRelatedSeasons(seasonId));
     }
 
     @PostMapping("/{id}/view")

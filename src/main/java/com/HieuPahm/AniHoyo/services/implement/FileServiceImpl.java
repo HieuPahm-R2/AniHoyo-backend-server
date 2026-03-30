@@ -40,7 +40,8 @@ public class FileServiceImpl implements IFileService {
 
     @Override
     public String storeFile(MultipartFile file, String folderName) throws IOException, URISyntaxException {
-        String finalName = System.currentTimeMillis() + "-" + file.getOriginalFilename();
+        String sanitized = file.getOriginalFilename().replaceAll("[^a-zA-Z0-9.\\-]", "_");
+        String finalName = System.currentTimeMillis() + "-" + sanitized;
         URI uri = new URI(baseURI + folderName + "/" + finalName);
         Path path = Paths.get(uri);
         // Ensure parent directories exist

@@ -106,7 +106,7 @@ public class SecurityUtils {
         data.setName(resLoginDTO.getUser().getName());
          // assign to claim
         Instant now = Instant.now();
-        Instant validity = now.plus(this.accessTokenExpire, ChronoUnit.SECONDS);
+        Instant validity = now.plus(this.refreshTokenExpire, ChronoUnit.SECONDS);
         // @formatter:off
         JwtClaimsSet claims = JwtClaimsSet.builder()
         .issuedAt(now)

@@ -1,29 +1,30 @@
 spring:
-  datasource:
-    username: root
-    password: 12102005
-    url: jdbc:mysql://localhost:3306/anihoyo
+  profiles:
+    active: dev
+  application:
+    name: AniHoyo
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate: format_sql:true
-  application:
-    name: AniHoyo
   servlet:
     multipart:
       max-file-size: 1000MB
       max-request-size: 1000MB
+  data:
+    redis:
+      database: 0
+      timeout: 60000
+      jedis:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
 anihoyo:
   jwt:
-    base64-secret: qoAEABDke07+AVLepXB4aCMtsT0wMAqR5x2VFyldsnx6e75YQkJH2UcZKTjEyoNgG71SBCXfq5N6NVZxWOfsHQ==
     access-token-validity-in-seconds: 8640
     refresh-token-validity-in-seconds: 864000
+
 server:
   port: 8083
-#config upload file
-hieupham:
-  upload-file:
-    base-uri: file:///D:/WhatWeDone-Will/AniHoyo-RestfulService/storage/
-  ffmpeg-path: C:\ffmpeg\bin\ffmpeg.exe
