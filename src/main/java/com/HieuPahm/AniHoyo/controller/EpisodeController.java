@@ -6,6 +6,7 @@ import com.HieuPahm.AniHoyo.model.dtos.ResUpFileDTO;
 import com.HieuPahm.AniHoyo.repository.EpisodeRepository;
 import com.HieuPahm.AniHoyo.services.implement.EpisodeService;
 import com.HieuPahm.AniHoyo.services.implement.FileServiceImpl;
+import com.HieuPahm.AniHoyo.services.implement.R2MediaStorageService;
 import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
 import com.HieuPahm.AniHoyo.utils.error.BadActionException;
 import com.HieuPahm.AniHoyo.utils.error.StorageException;
@@ -41,12 +42,14 @@ public class EpisodeController {
     private final EpisodeService episodeService;
     private final EpisodeRepository episodeRepository;
     private final FileServiceImpl fileServiceImpl;
+    private final R2MediaStorageService r2MediaStorageService;
 
     public EpisodeController(EpisodeService episodeService, EpisodeRepository episodeRepository,
-            FileServiceImpl fileServiceImpl) {
+            FileServiceImpl fileServiceImpl, R2MediaStorageService r2MediaStorageService) {
         this.episodeService = episodeService;
         this.episodeRepository = episodeRepository;
         this.fileServiceImpl = fileServiceImpl;
+        this.r2MediaStorageService = r2MediaStorageService;
     }
 
     @PostMapping("/add-episode")
@@ -92,9 +95,14 @@ public class EpisodeController {
         if (!isValid) {
             throw new StorageException("Invalid file format, Please try again!");
         }
-        // handle create folder (Option)
-        this.fileServiceImpl.createFolder(baseURI + folder);
-        String fileUpload = this.fileServiceImpl.storeFile(file, folder);
+        String fileUpload;
+        if (r2MediaStorageService.isEnabled()) {
+            // R2 originals stay private; the client never receives this object URL.
+            fileUpload = r2MediaStorageService.storeSourceVideo(file);
+        } else {
+            this.fileServiceImpl.createFolder(baseURI + folder);
+            fileUpload = this.fileServiceImpl.storeFile(file, folder);
+        }
         ResUpFileDTO result = new ResUpFileDTO(fileUpload, Instant.now());
 
         return ResponseEntity.ok().body(result);

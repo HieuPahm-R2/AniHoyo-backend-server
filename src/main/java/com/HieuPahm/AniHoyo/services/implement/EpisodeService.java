@@ -54,12 +54,14 @@ public class EpisodeService implements IEpisodeService {
     private final EpisodeRepository episodeRepository;
     private final SeasonRepository seasonRepository;
     private final ModelMapper modelMapper;
+    private final R2MediaStorageService r2MediaStorageService;
 
     public EpisodeService(EpisodeRepository episodeRepository, SeasonRepository seasonRepository,
-            ModelMapper modelMapper) {
+            ModelMapper modelMapper, R2MediaStorageService r2MediaStorageService) {
         this.episodeRepository = episodeRepository;
         this.seasonRepository = seasonRepository;
         this.modelMapper = modelMapper;
+        this.r2MediaStorageService = r2MediaStorageService;
     }
 
     @Override
@@ -127,75 +129,103 @@ public class EpisodeService implements IEpisodeService {
     @Override
     public long processVideo(long id) {
         Episode episode = this.episodeRepository.findById(id).get();
-        String filePath = episode.getFilePath();
+        if (r2MediaStorageService.isEnabled()) {
+            return processVideoWithR2(episode);
+        }
 
-        URI inputUri = URI.create(baseURI + "videos/" + filePath);
+        URI inputUri = URI.create(baseURI + "videos/" + episode.getFilePath());
         Path inputVideoPath = Paths.get(inputUri);
-
         Path outputRoot = Paths.get(URI.create(baseURI + "videos_hls/" + episode.getTitle() + "/"));
 
         try {
-            Files.createDirectories(outputRoot);
-
-            int sourceWidth = 0;
-            int sourceHeight = 0;
-            try {
-                int[] wh = probeVideoResolution(inputVideoPath);
-                sourceWidth = wh[0];
-                sourceHeight = wh[1];
-            } catch (Exception ignore) {
-                // keep defaults (0,0) to fall back to 360p only
-            }
-
-            List<Integer> targetHeights = new ArrayList<>();
-            targetHeights.add(360);
-            if (sourceHeight >= 720) {
-                targetHeights.add(720);
-                targetHeights.add(1080);
-            }
-
-            List<String> masterEntries = new ArrayList<>();
-            for (Integer height : targetHeights) {
-                Path variantDir = outputRoot.resolve(height + "p");
-                Files.createDirectories(variantDir);
-
-                int outWidth;
-                if (sourceWidth > 0 && sourceHeight > 0) {
-                    outWidth = Math.max(2, ((sourceWidth * height) / sourceHeight) & ~1);
-                } else {
-                    outWidth = Math.max(2, ((16 * height) / 9) & ~1);
-                }
-
-                Path segmentPath = variantDir.resolve("segment_%03d.ts");
-                Path playlistPath = variantDir.resolve("index.m3u8");
-
-                runFfmpegToHls(inputVideoPath, segmentPath, playlistPath, height);
-
-                long bandwidth;
-                if (height >= 1080) {
-                    bandwidth = 5000000L;
-                } else if (height >= 720) {
-                    bandwidth = 2500000L;
-                } else {
-                    bandwidth = 800000L;
-                }
-                masterEntries.add("#EXT-X-STREAM-INF:BANDWIDTH=" + bandwidth + ",RESOLUTION=" + outWidth + "x" + height
-                        + "\n" + height + "p/index.m3u8");
-            }
-
-            StringBuilder master = new StringBuilder();
-            master.append("#EXTM3U\n");
-            master.append("#EXT-X-VERSION:3\n");
-            for (String entry : masterEntries) {
-                master.append(entry).append("\n");
-            }
-            Files.write(outputRoot.resolve("master.m3u8"), master.toString().getBytes(StandardCharsets.UTF_8));
-
+            encodeHls(inputVideoPath, outputRoot);
             return id;
-
         } catch (IOException ex) {
-            throw new RuntimeException("processing failed !!\n" + ex.getMessage());
+            throw new RuntimeException("processing failed !!\n" + ex.getMessage(), ex);
         }
+    }
+
+    private long processVideoWithR2(Episode episode) {
+        Path inputVideoPath = null;
+        Path outputRoot = null;
+        try {
+            inputVideoPath = r2MediaStorageService.downloadSourceVideo(episode.getFilePath());
+            outputRoot = Files.createTempDirectory("anihoyo-hls-" + episode.getId() + "-");
+            encodeHls(inputVideoPath, outputRoot);
+            r2MediaStorageService.uploadHlsDirectory(episode, outputRoot);
+            return episode.getId();
+        } catch (IOException ex) {
+            throw new RuntimeException("R2 video processing failed !!\n" + ex.getMessage(), ex);
+        } finally {
+            if (inputVideoPath != null) {
+                try {
+                    Files.deleteIfExists(inputVideoPath);
+                } catch (IOException ignored) {
+                    // Temporary source cleanup is best effort.
+                }
+            }
+            r2MediaStorageService.deleteDirectory(outputRoot);
+        }
+    }
+
+    private void encodeHls(Path inputVideoPath, Path outputRoot) throws IOException {
+        Files.createDirectories(outputRoot);
+
+        int sourceWidth = 0;
+        int sourceHeight = 0;
+        try {
+            int[] wh = probeVideoResolution(inputVideoPath);
+            sourceWidth = wh[0];
+            sourceHeight = wh[1];
+        } catch (Exception ignore) {
+            // keep defaults (0,0) to fall back to 360p only
+        }
+
+        List<Integer> targetHeights = new ArrayList<>();
+        targetHeights.add(360);
+        if (sourceHeight >= 720) {
+            targetHeights.add(720);
+        }
+        if (sourceHeight >= 1080) {
+            targetHeights.add(1080);
+        }
+
+        List<String> masterEntries = new ArrayList<>();
+        for (Integer height : targetHeights) {
+            Path variantDir = outputRoot.resolve(height + "p");
+            Files.createDirectories(variantDir);
+
+            int outWidth;
+            if (sourceWidth > 0 && sourceHeight > 0) {
+                outWidth = Math.max(2, ((sourceWidth * height) / sourceHeight) & ~1);
+            } else {
+                outWidth = Math.max(2, ((16 * height) / 9) & ~1);
+            }
+
+            Path segmentPath = variantDir.resolve("segment_%03d.ts");
+            Path playlistPath = variantDir.resolve("index.m3u8");
+
+            runFfmpegToHls(inputVideoPath, segmentPath, playlistPath, height);
+
+            long bandwidth;
+            if (height >= 1080) {
+                bandwidth = 5000000L;
+            } else if (height >= 720) {
+                bandwidth = 2500000L;
+            } else {
+                bandwidth = 800000L;
+            }
+            masterEntries.add("#EXT-X-STREAM-INF:BANDWIDTH=" + bandwidth + ",RESOLUTION=" + outWidth + "x" + height
+                    + "\n" + height + "p/index.m3u8");
+        }
+
+        StringBuilder master = new StringBuilder();
+        master.append("#EXTM3U\n");
+        master.append("#EXT-X-VERSION:3\n");
+        for (String entry : masterEntries) {
+            master.append(entry).append("\n");
+        }
+        Files.write(outputRoot.resolve("master.m3u8"), master.toString().getBytes(StandardCharsets.UTF_8));
     }
 
     private int[] probeVideoResolution(Path inputVideoPath) throws IOException, InterruptedException {

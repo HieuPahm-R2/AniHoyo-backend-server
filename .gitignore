@@ -1,6 +1,8 @@
 HELP.md
 target/
 videos/
+cmd-ani.txt
+.env
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

@@ -1,4 +1,8 @@
 spring:
+  # Local credentials file used for development only. It is optional so containers
+  # should provide the R2_* environment variables instead.
+  config:
+    import: optional:file:../cmd-ani.txt[.properties]
   profiles:
     active: dev
   application:
@@ -28,3 +32,18 @@ anihoyo:
 
 server:
   port: 8083
+
+storage:
+  r2:
+    enabled: ${R2_ENABLED:false}
+    account-id: ${R2_ACCOUNT_ID:}
+    endpoint: ${R2_ENDPOINT:}
+    # The fallback properties support the existing cmd-ani.txt file:
+    # access=<R2 Access Key ID>
+    # secret=<R2 Secret Access Key>
+    access-key-id: ${R2_ACCESS_KEY_ID:${access:}}
+    secret-access-key: ${R2_SECRET_ACCESS_KEY:${secret:}}
+    source-bucket: ${R2_SOURCE_BUCKET:anihoyo-source}
+    media-bucket: ${R2_MEDIA_BUCKET:anihoyo-media}
+    public-base-url: ${R2_PUBLIC_BASE_URL:https://media.108pog.site}
+    hls-prefix: ${R2_HLS_PREFIX:hls}

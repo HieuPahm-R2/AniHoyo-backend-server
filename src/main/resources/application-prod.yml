@@ -26,3 +26,9 @@ hieupham:
   upload-file:
     base-uri: file:///uploads/
   ffmpeg-path: /usr/bin/ffmpeg
+
+storage:
+  r2:
+    # Production must explicitly be able to reach R2; fail at startup rather
+    # than silently falling back to a container-local volume.
+    enabled: ${R2_ENABLED:true}

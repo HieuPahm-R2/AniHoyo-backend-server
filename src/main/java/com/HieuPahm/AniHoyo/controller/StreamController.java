@@ -26,6 +26,7 @@ import com.HieuPahm.AniHoyo.model.entities.Episode;
 import com.HieuPahm.AniHoyo.repository.EpisodeRepository;
 import com.HieuPahm.AniHoyo.services.implement.EpisodeService;
 import com.HieuPahm.AniHoyo.services.implement.FileServiceImpl;
+import com.HieuPahm.AniHoyo.services.implement.R2MediaStorageService;
 import com.HieuPahm.AniHoyo.utils.constant.ChunkConstant;
 
 @RestController
@@ -37,12 +38,14 @@ public class StreamController {
 
     private final EpisodeRepository episodeRepository;
     private final FileServiceImpl fileServiceImpl;
+    private final R2MediaStorageService r2MediaStorageService;
 
     public StreamController(EpisodeService episodeService, EpisodeRepository episodeRepository,
-            FileServiceImpl fileServiceImpl) {
+            FileServiceImpl fileServiceImpl, R2MediaStorageService r2MediaStorageService) {
 
         this.episodeRepository = episodeRepository;
         this.fileServiceImpl = fileServiceImpl;
+        this.r2MediaStorageService = r2MediaStorageService;
     }
 
     // Test endpoint to verify CORS
@@ -56,6 +59,14 @@ public class StreamController {
     public ResponseEntity<?> streamVideoRange(
             @PathVariable("id") long id,
             @RequestHeader(value = "Range", required = false) String range) {
+
+        if (r2MediaStorageService.isEnabled()) {
+            // The original is intentionally private in R2. Clients must use HLS,
+            // which is served directly by the CDN rather than relayed by this API.
+            return ResponseEntity.status(HttpStatus.GONE)
+                    .header(HttpHeaders.LINK, "</api/v1/" + id + "/master.m3u8>; rel=alternate")
+                    .build();
+        }
 
         Optional<Episode> episode = this.episodeRepository.findById(id);
         if (episode.isEmpty()) {
@@ -139,6 +150,11 @@ public class StreamController {
         if (episode.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+        if (r2MediaStorageService.isEnabled()) {
+            return ResponseEntity.<Resource>status(HttpStatus.FOUND)
+                    .location(r2MediaStorageService.masterPlaylistUri(episode.get()))
+                    .build();
+        }
         URI uri = URI.create(baseURI + "videos_hls/" + episode.get().getTitle() + "/master.m3u8");
         Path path = Paths.get(uri);
 
@@ -173,6 +189,11 @@ public class StreamController {
         if (!quality.endsWith("p") || !quality.matches("\\d+p")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
+        if (r2MediaStorageService.isEnabled()) {
+            return ResponseEntity.<Resource>status(HttpStatus.FOUND)
+                    .location(r2MediaStorageService.objectUri(episode.get(), quality + "/" + segment + ".ts"))
+                    .build();
+        }
 
         // create path for segment with quality folder
         URI uri = URI
@@ -206,6 +227,11 @@ public class StreamController {
         // Validate quality parameter (should end with 'p' like 360p, 720p, 1080p)
         if (!quality.endsWith("p") || !quality.matches("\\d+p")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        if (r2MediaStorageService.isEnabled()) {
+            return ResponseEntity.<Resource>status(HttpStatus.FOUND)
+                    .location(r2MediaStorageService.objectUri(episode.get(), quality + "/index.m3u8"))
+                    .build();
         }
 
         // create path for quality playlist
