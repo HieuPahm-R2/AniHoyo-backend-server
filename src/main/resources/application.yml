@@ -26,6 +26,10 @@ spring:
           max-wait: -1ms
 
 anihoyo:
+  views:
+    flush-interval-ms: ${VIEW_FLUSH_INTERVAL_MS:300000}
+    deduplication-hours: ${VIEW_DEDUPLICATION_HOURS:24}
+    cookie-secure: ${VIEW_COOKIE_SECURE:false}
   jwt:
     access-token-validity-in-seconds: 8640
     refresh-token-validity-in-seconds: 864000
