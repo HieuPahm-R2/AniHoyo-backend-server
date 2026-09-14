@@ -2,12 +2,16 @@ package com.HieuPahm.AniHoyo.services.implement;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -15,8 +19,11 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.HieuPahm.AniHoyo.model.dtos.PaginationResultDTO;
 import com.HieuPahm.AniHoyo.model.dtos.SeasonDTO;
@@ -36,6 +43,9 @@ import com.turkraft.springfilter.parser.node.FilterNode;
 
 @Service
 public class SeasonService implements ISeasonService {
+    private static final String VIEW_DEDUPLICATION_PREFIX = "view:dedupe:";
+    private static final String PENDING_VIEW_PREFIX = "view:pending:episode:";
+
     @Autowired
     FilterBuilder fb;
     @Autowired
@@ -44,6 +54,10 @@ public class SeasonService implements ISeasonService {
     private FilterSpecificationConverter filterSpecificationConverter;
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+    @Autowired
+    private CacheManager cacheManager;
+    @Value("${anihoyo.views.deduplication-hours:24}")
+    private long viewDeduplicationHours;
 
     private final ModelMapper modelMapper;
     private final SeasonRepository seasonRepository;
@@ -162,24 +176,92 @@ public class SeasonService implements ISeasonService {
     }
 
     /**
-     * Increases the view count at most once per session per episode.
-     * Uses Redis SETNX with a 24-hour TTL to deduplicate across restarts and nodes.
+     * Counts a qualifying play once for a viewer within the configured window.
+     * The request touches Redis only; MySQL is updated by flushPendingViewCounts.
      */
-    @CacheEvict(value = "topSeasons", allEntries = true)
-    public void increaseViewOnce(Long ssId, String sessionId) {
-        String viewKey = "view:" + ssId + ":" + sessionId;
-        Boolean isNew = redisTemplate.opsForValue().setIfAbsent(viewKey, "1", Duration.ofHours(24));
+    public void increaseViewOnce(Long episodeId, String viewerId) {
+        String viewKey = VIEW_DEDUPLICATION_PREFIX + episodeId + ":" + viewerId;
+        Boolean isNew = redisTemplate.opsForValue().setIfAbsent(
+                viewKey, "1", Duration.ofHours(viewDeduplicationHours));
         if (Boolean.FALSE.equals(isNew)) {
-            return; // already counted for this session
+            return;
         }
 
-        Episode ep = episodeRepository.findById(ssId)
-                .orElseThrow(() -> new NoSuchElementException("Not found"));
-        Season season = ep.getSeason();
-        season.setViewCount(season.getViewCount() + 1);
-        seasonRepository.save(season);
+        // One counter per episode keeps INCR atomic while avoiding every-view MySQL writes.
+        redisTemplate.opsForValue().increment(PENDING_VIEW_PREFIX + episodeId);
+    }
 
-        // Evict the cached season entry so the new view count is visible
-        redisTemplate.delete("seasons::" + season.getId());
+    /**
+     * Atomically claims pending Redis counters, aggregates them by season, then applies one
+     * SQL increment per affected season. Failed database work is put back into Redis for retry.
+     */
+    @Transactional
+    public void flushPendingViewCounts() {
+        Map<String, Long> claimedCounters = new HashMap<>();
+        try (Cursor<String> keys = redisTemplate.scan(ScanOptions.scanOptions()
+                .match(PENDING_VIEW_PREFIX + "*")
+                .count(1_000)
+                .build())) {
+            while (keys.hasNext()) {
+                String key = keys.next();
+                Object value = redisTemplate.opsForValue().getAndDelete(key);
+                Long delta = asPositiveLong(value);
+                if (delta != null) {
+                    claimedCounters.put(key, delta);
+                }
+            }
+        }
+
+        if (claimedCounters.isEmpty()) {
+            return;
+        }
+
+        try {
+            Map<Long, Long> viewsBySeason = new HashMap<>();
+            for (Map.Entry<String, Long> counter : claimedCounters.entrySet()) {
+                Long episodeId = episodeIdFromCounterKey(counter.getKey());
+                if (episodeId == null) {
+                    continue;
+                }
+                episodeRepository.findById(episodeId)
+                        .map(Episode::getSeason)
+                        .map(Season::getId)
+                        .ifPresent(seasonId -> viewsBySeason.merge(seasonId, counter.getValue(), Long::sum));
+            }
+
+            for (Map.Entry<Long, Long> seasonViews : viewsBySeason.entrySet()) {
+                seasonRepository.addViewCount(seasonViews.getKey(), seasonViews.getValue());
+                evictViewCaches(seasonViews.getKey());
+            }
+        } catch (RuntimeException exception) {
+            // GETDEL prevents a read/delete race. Re-adding the claimed delta preserves it for
+            // the next scheduled attempt, including increments received while this flush ran.
+            claimedCounters.forEach((key, delta) -> redisTemplate.opsForValue().increment(key, delta));
+            throw exception;
+        }
+    }
+
+    private Long asPositiveLong(Object value) {
+        if (value == null) return null;
+        try {
+            long parsed = Long.parseLong(value.toString());
+            return parsed > 0 ? parsed : null;
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
+    }
+
+    private Long episodeIdFromCounterKey(String key) {
+        try {
+            return Long.valueOf(key.substring(PENDING_VIEW_PREFIX.length()));
+        } catch (RuntimeException ignored) {
+            return null;
+        }
+    }
+
+    private void evictViewCaches(Long seasonId) {
+        Optional.ofNullable(cacheManager.getCache("seasons")).ifPresent(cache -> cache.evict(seasonId));
+        Optional.ofNullable(cacheManager.getCache("relatedSeasons")).ifPresent(cache -> cache.clear());
+        Optional.ofNullable(cacheManager.getCache("topSeasons")).ifPresent(cache -> cache.clear());
     }
 }
