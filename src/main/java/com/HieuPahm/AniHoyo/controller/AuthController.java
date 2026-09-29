@@ -134,10 +134,13 @@ public class AuthController {
         ResLoginDTO resLoginDTO = new ResLoginDTO();
         User realUser = this.userService.handleGetUserByUsername(email);
         if (realUser != null) {
+            // Chú ý thứ tự tham số của UserData: (id, name, email, role) — giống
+            // nhánh login. Trước đây email/fullName bị truyền ngược nên response
+            // refresh trả name = email và email = fullName.
             ResLoginDTO.UserData userLog = new ResLoginDTO.UserData(
                     realUser.getId(),
-                    realUser.getEmail(),
                     realUser.getFullName(),
+                    realUser.getEmail(),
                     realUser.getRole());
             resLoginDTO.setUser(userLog);
         }
