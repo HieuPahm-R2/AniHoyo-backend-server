@@ -75,10 +75,13 @@ public class SeasonService implements ISeasonService {
     @Override
     public SeasonDTO insert(SeasonDTO dto) {
         if (dto.getFilm() != null) {
-            Optional<Film> check = this.filmRepository.findById(dto.getFilm().getId());
-            if (check.isPresent()) {
-                dto.setFilm(check.get());
-            }
+            // Leaving the transient Film in place used to end as a raw MySQL foreign key
+            // violation ("Cannot add or update a child row"), which says nothing about the
+            // real problem: the film id does not exist.
+            Film film = this.filmRepository.findById(dto.getFilm().getId())
+                    .orElseThrow(() -> new NoSuchElementException(
+                            "Không tìm thấy film với id=" + dto.getFilm().getId()));
+            dto.setFilm(film);
         }
         return modelMapper.map(
                 this.seasonRepository.save(modelMapper.map(dto, Season.class)), SeasonDTO.class);
