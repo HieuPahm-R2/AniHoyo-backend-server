@@ -20,6 +20,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,8 +34,10 @@ public class Role {
     private long id;
 
     @NotBlank(message = "Not to blank this field")
+    @Size(max = 255, message = "Tên role tối đa 255 ký tự")
     private String name;
 
+    @Size(max = 255, message = "Mô tả role tối đa 255 ký tự")
     private String description;
     private boolean active;
 

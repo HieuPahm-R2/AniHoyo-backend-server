@@ -16,6 +16,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,12 +32,16 @@ public class Permission {
     private long id;
 
     @NotBlank(message = "Not to blank this field")
+    @Size(max = 255, message = "Tên permission tối đa 255 ký tự")
     private String name;
     @NotBlank(message = "Not to blank this field")
+    @Size(max = 255, message = "apiPath tối đa 255 ký tự")
     private String apiPath;
     @NotBlank(message = "Not to blank this field")
+    @Size(max = 255, message = "method tối đa 255 ký tự")
     private String method;
     @NotBlank(message = "Not to blank this field")
+    @Size(max = 255, message = "module tối đa 255 ký tự")
     private String module;
 
     private Instant createdTime;

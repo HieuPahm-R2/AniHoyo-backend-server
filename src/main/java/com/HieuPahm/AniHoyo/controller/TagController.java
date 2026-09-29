@@ -19,6 +19,8 @@ import com.HieuPahm.AniHoyo.services.implement.TagService;
 import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
 import com.turkraft.springfilter.boot.Filter;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1")
 public class TagController {
@@ -29,13 +31,13 @@ public class TagController {
     }
 
     @PostMapping("/add-tag")
-    public ResponseEntity<?> addCategory(@RequestBody TagDTO tagDTO) {
+    public ResponseEntity<?> addCategory(@Valid @RequestBody TagDTO tagDTO) {
         return ResponseEntity.ok(tagService.insert(tagDTO));
     }
 
     @PutMapping("/update-tag")
     @MessageApi("Update a tag film")
-    public ResponseEntity<?> update(@RequestBody TagDTO tag) {
+    public ResponseEntity<?> update(@Valid @RequestBody TagDTO tag) {
         return ResponseEntity.ok().body(tagService.update(tag));
     }
 

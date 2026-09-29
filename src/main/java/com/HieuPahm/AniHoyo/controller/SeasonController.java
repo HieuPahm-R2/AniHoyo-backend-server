@@ -46,7 +46,7 @@ public class SeasonController {
 
     @PostMapping("/add-season")
     @MessageApi("add a season")
-    public ResponseEntity<?> addSeason(@RequestBody SeasonDTO dto) {
+    public ResponseEntity<?> addSeason(@Valid @RequestBody SeasonDTO dto) {
         return ResponseEntity.ok().body(this.seasonService.insert(dto));
     }
 

@@ -20,6 +20,8 @@ import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
 import com.HieuPahm.AniHoyo.utils.error.BadActionException;
 import com.turkraft.springfilter.boot.Filter;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1")
 public class RoleController {
@@ -33,7 +35,7 @@ public class RoleController {
 
     @PostMapping("/add-role")
     @MessageApi("Add a role")
-    public ResponseEntity<Role> create(@RequestBody Role data) throws BadActionException {
+    public ResponseEntity<Role> create(@Valid @RequestBody Role data) throws BadActionException {
         if (this.roleRepository.existsByName(data.getName())) {
             throw new BadActionException("Dữ liệu bị trùng lặp");
         }
@@ -42,7 +44,7 @@ public class RoleController {
 
     @PutMapping("/update-role")
     @MessageApi("Update a role")
-    public ResponseEntity<Role> update(@RequestBody Role data) throws BadActionException {
+    public ResponseEntity<Role> update(@Valid @RequestBody Role data) throws BadActionException {
         return ResponseEntity.ok().body(this.roleService.update(data));
     }
 

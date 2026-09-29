@@ -21,6 +21,8 @@ import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
 import com.HieuPahm.AniHoyo.utils.error.BadActionException;
 import com.turkraft.springfilter.boot.Filter;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1")
 public class CategoryController {
@@ -33,12 +35,12 @@ public class CategoryController {
     }
 
     @PostMapping("/add-category")
-    public ResponseEntity<?> addCategory(@RequestBody CategoryDTO categoryDTO) {
+    public ResponseEntity<?> addCategory(@Valid @RequestBody CategoryDTO categoryDTO) {
         return ResponseEntity.ok(categoryService.insert(categoryDTO));
     }
 
     @PutMapping("/update-category")
-    public ResponseEntity<?> updateCategory(@RequestBody CategoryDTO categoryDTO) {
+    public ResponseEntity<?> updateCategory(@Valid @RequestBody CategoryDTO categoryDTO) {
         categoryService.update(categoryDTO);
         return ResponseEntity.ok("update this category completely");
     }

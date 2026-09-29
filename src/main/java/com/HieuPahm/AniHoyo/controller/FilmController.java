@@ -36,7 +36,7 @@ public class FilmController {
 
     @PostMapping("/add-film")
     @MessageApi("Add new film")
-    public ResponseEntity<?> addFilm(@RequestBody FilmDTO filmDTO) {
+    public ResponseEntity<?> addFilm(@Valid @RequestBody FilmDTO filmDTO) {
         return ResponseEntity.ok(filmService.insert(filmDTO));
     }
 

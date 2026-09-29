@@ -19,6 +19,8 @@ import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
 import com.HieuPahm.AniHoyo.utils.error.BadActionException;
 import com.turkraft.springfilter.boot.Filter;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1")
 public class PermissionController {
@@ -30,7 +32,7 @@ public class PermissionController {
 
     @PostMapping("/add-permission")
     @MessageApi("Add a permission")
-    public ResponseEntity<Permission> create(@RequestBody Permission data) throws BadActionException {
+    public ResponseEntity<Permission> create(@Valid @RequestBody Permission data) throws BadActionException {
         if (this.permissionService.alreadyExistPermission(data)) {
             throw new BadActionException("Đã tồn tại, hãy thử lại!");
         }
@@ -39,7 +41,7 @@ public class PermissionController {
 
     @PutMapping("/update-permission")
     @MessageApi("Update a permission")
-    public ResponseEntity<Permission> update(@RequestBody Permission data) throws BadActionException {
+    public ResponseEntity<Permission> update(@Valid @RequestBody Permission data) throws BadActionException {
         return ResponseEntity.ok().body(this.permissionService.update(data));
     }
 
