@@ -33,6 +33,12 @@ anihoyo:
   jwt:
     access-token-validity-in-seconds: 8640
     refresh-token-validity-in-seconds: 864000
+    # Token vừa bị xoay vẫn dùng được thêm bao lâu (2 tab refresh cùng lúc).
+    refresh-grace-seconds: ${JWT_REFRESH_GRACE_SECONDS:60}
+    # Giữ dòng đã thu hồi/hết hạn bao lâu trong refresh_tokens trước khi dọn.
+    refresh-retention-hours: ${JWT_REFRESH_RETENTION_HOURS:24}
+    # Cron dọn bảng refresh_tokens.
+    refresh-cleanup-cron: "${JWT_REFRESH_CLEANUP_CRON:0 30 3 * * *}"
 
 server:
   port: 8083
