@@ -30,41 +30,25 @@ public class SecurityConfiguration {
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http, AuthEntryPointConfig authEntryPointConfig)
                         throws Exception {
-                String[] whileList = {
-                                "/", "/api/v1/", "/ws/**",
-                                "/api/v1/auth/**",
-                                "/api/v1/stream/range/**", "/api/v1/notifications/**",
-                                "/storage/**",
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
-                };
+                // Public paths live in PublicPaths so the filter chain and the
+                // AuthorityIntercepter ACL cannot drift apart (they did: the view
+                // counter and the HLS playlists were permitAll here but were then
+                // refused with 403 by the ACL for logged-in users).
                 http
                                 .csrf(c -> c.disable())
                                 .cors(Customizer.withDefaults()) // This will use the CorsConfigure bean
                                 .authorizeHttpRequests(
                                                 authz -> authz
-                                                                .requestMatchers(whileList).permitAll()
-                                                                // .requestMatchers(HttpMethod.GET,
-                                                                // "/api/v1/seasons/**")
-                                                                // .permitAll() --> nếu muốn cho user có thể xem qua khi
-                                                                // không cần đăng nhập
+                                                                .requestMatchers(PublicPaths.PUBLIC).permitAll()
+                                                                // Ghi chú: nếu muốn cho khách chưa đăng nhập xem
+                                                                // nội dung, thêm "/api/v1/seasons/**" (GET) vào
+                                                                // PublicPaths.PUBLIC_PLAYBACK.
 
                                                                 .requestMatchers(HttpMethod.POST,
-                                                                                "/api/v1/*/view/**")
+                                                                                PublicPaths.PUBLIC_VIEW_TRACKING)
                                                                 .permitAll()
                                                                 .requestMatchers(HttpMethod.GET,
-                                                                                "/api/v1/*/master.m3u8")
-                                                                .permitAll()
-                                                                .requestMatchers(HttpMethod.GET, "/api/v1/*/*.ts")
-                                                                .permitAll()
-                                                                // Quality-specific playlist files
-                                                                .requestMatchers(HttpMethod.GET,
-                                                                                "/api/v1/*/*/index.m3u8")
-                                                                .permitAll()
-                                                                // HLS segments with quality folder
-                                                                .requestMatchers(HttpMethod.GET,
-                                                                                "/api/v1/*/*/*.ts")
+                                                                                PublicPaths.PUBLIC_PLAYBACK)
                                                                 .permitAll()
                                                                 .anyRequest().authenticated())
                                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())

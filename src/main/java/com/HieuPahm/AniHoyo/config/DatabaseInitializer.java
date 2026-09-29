@@ -52,6 +52,8 @@ public class DatabaseInitializer implements CommandLineRunner {
             arrResult.add(
                     new Permission("fetch all seasons of film", "/api/v1/seasons/by-film/{filmId}", "GET", "SEASONS"));
             arrResult.add(new Permission("fetch top 5 of film", "/api/v1/seasons/top-views", "GET", "SEASONS"));
+            arrResult.add(
+                    new Permission("fetch seasons related", "/api/v1/seasons/related/{seasonId}", "GET", "SEASONS"));
 
             arrResult.add(new Permission("Create a tag", "/api/v1/add-tag", "POST", "TAGS"));
             arrResult.add(new Permission("Update a tag", "/api/v1/update-tag", "PUT", "TAGS"));
@@ -85,7 +87,9 @@ public class DatabaseInitializer implements CommandLineRunner {
 
             arrResult.add(new Permission("Create a episode", "/api/v1/add-episode", "POST", "EPISODES"));
             arrResult.add(new Permission("Update a episode", "/api/v1/update-episode", "PUT", "EPISODES"));
-            arrResult.add(new Permission("Delete a episodde", "/api/v1/delete-epsiode/{id}", "DELETE", "EPISODES"));
+            // Was "/api/v1/delete-epsiode/{id}" (typo) while EpisodeController maps
+            // "/delete-episode/{id}", so no role could ever delete an episode.
+            arrResult.add(new Permission("Delete a episode", "/api/v1/delete-episode/{id}", "DELETE", "EPISODES"));
             arrResult.add(
                     new Permission("fetch all eps of season", "/api/v1/episodes/by-season/{seasonId}", "GET",
                             "EPISODES"));
