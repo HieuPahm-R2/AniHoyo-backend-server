@@ -18,7 +18,6 @@ public class RegisterDTO {
 
     private String email;
 
-    private String refreshToken;
     private String password;
     private Instant updatedTime;
     private Instant createdTime;

@@ -20,11 +20,6 @@ public interface IUserService {
 
     public UpdateUserDTO update(User data) throws BadActionException;
 
-    // Authenticate
-    public User fetchWithTokenAndEmail(String token, String email);
-
-    public void saveRefreshToken(String token, String email);
-
     public User handleGetUserByUsername(String username);
 
     public User getUserWithPermissions(String email);

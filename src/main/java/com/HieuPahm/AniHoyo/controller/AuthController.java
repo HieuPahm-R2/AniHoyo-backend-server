@@ -21,13 +21,16 @@ import com.HieuPahm.AniHoyo.model.dtos.auth.LoginDTO;
 import com.HieuPahm.AniHoyo.model.dtos.auth.ResLoginDTO;
 import com.HieuPahm.AniHoyo.model.dtos.auth.RoleDTO;
 import com.HieuPahm.AniHoyo.model.dtos.auth.UserDTO;
+import com.HieuPahm.AniHoyo.model.entities.RefreshToken;
 import com.HieuPahm.AniHoyo.model.entities.Role;
 import com.HieuPahm.AniHoyo.model.entities.User;
+import com.HieuPahm.AniHoyo.services.IRefreshTokenService;
 import com.HieuPahm.AniHoyo.services.IUserService;
 import com.HieuPahm.AniHoyo.utils.SecurityUtils;
 import com.HieuPahm.AniHoyo.utils.anotation.MessageApi;
 import com.HieuPahm.AniHoyo.utils.error.BadActionException;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
@@ -37,19 +40,21 @@ public class AuthController {
     private long refreshTokenExpire;
 
     private final IUserService userService;
+    private final IRefreshTokenService refreshTokenService;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final SecurityUtils securityUtils;
 
     public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder,
-            IUserService userService, SecurityUtils securityUtils) {
+            IUserService userService, SecurityUtils securityUtils, IRefreshTokenService refreshTokenService) {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.userService = userService;
 
         this.securityUtils = securityUtils;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<ResLoginDTO> login(@Valid @RequestBody LoginDTO loginData) {
+    public ResponseEntity<ResLoginDTO> login(@Valid @RequestBody LoginDTO loginData, HttpServletRequest request) {
         // transfer input include username/password
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 loginData.getUsername(), loginData.getPassword());
@@ -72,7 +77,10 @@ public class AuthController {
         resLoginDTO.setAccessToken(access_token);
         // gen refresh token
         String refresh_token = this.securityUtils.generateRefreshToken(loginData.getUsername(), resLoginDTO);
-        this.userService.saveRefreshToken(refresh_token, loginData.getUsername());
+        // Mỗi lần login ghi một phiên riêng vào refresh_tokens, nên login ở thiết bị
+        // khác không còn làm cookie của phiên đang chạy mất hiệu lực.
+        this.refreshTokenService.create(refresh_token, realUser, refreshTokenExpire,
+                request.getHeader("User-Agent"));
         // setup cookies
         ResponseCookie resCookies = ResponseCookie
                 .from("refresh-token", refresh_token)
@@ -111,9 +119,10 @@ public class AuthController {
     @GetMapping("/auth/refresh")
     @MessageApi("Renew token action")
     public ResponseEntity<ResLoginDTO> getRefreshToken(
-            @CookieValue(name = "refresh-token", defaultValue = "error") String refreshToken)
+            @CookieValue(name = "refresh-token", defaultValue = "error") String refreshToken,
+            HttpServletRequest request)
             throws BadActionException {
-        if (refreshToken.equals("error")) {
+        if ("error".equals(refreshToken)) {
             throw new BadActionException("Refresh token not be attached in request");
         }
         Jwt correctToken;
@@ -121,14 +130,17 @@ public class AuthController {
             // running check valid
             correctToken = this.securityUtils.confirmValidRefreshToken(refreshToken);
         } catch (Exception ex) {
-            // Nếu token hết hạn hoặc không hợp lệ, trả về lỗi 400
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            // Chữ ký sai hoặc token hết hạn → 401 để client hiểu là hết phiên
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(null);
         }
         String email = correctToken.getSubject();
-        User currentUser = this.userService.fetchWithTokenAndEmail(refreshToken, email);
-        if (currentUser == null) {
-            throw new BadActionException("Invalid refresh token");
+        // Phiên phải còn trong refresh_tokens: chưa logout, chưa hết hạn, và nếu vừa
+        // bị xoay thì còn trong cửa sổ grace (2 tab refresh cùng lúc).
+        RefreshToken session = this.refreshTokenService.verify(refreshToken);
+        if (session == null || session.getUser() == null
+                || !email.equalsIgnoreCase(session.getUser().getEmail())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
         ResLoginDTO resLoginDTO = new ResLoginDTO();
@@ -149,7 +161,10 @@ public class AuthController {
         resLoginDTO.setAccessToken(access_token);
         // gen refresh token
         String refresh_token = this.securityUtils.generateRefreshToken(email, resLoginDTO);
-        this.userService.saveRefreshToken(refresh_token, email);
+        // Xoay token: phiên cũ bị thu hồi (còn grace ngắn cho tab song song) và một
+        // dòng mới được ghi cho token vừa phát hành.
+        this.refreshTokenService.rotate(session, refresh_token, refreshTokenExpire,
+                request.getHeader("User-Agent"));
         // setup cookies
         ResponseCookie resCookies = ResponseCookie
                 .from("refresh-token", refresh_token)
@@ -163,13 +178,12 @@ public class AuthController {
 
     @PostMapping("/auth/logout")
     @MessageApi("sign out action")
-    public ResponseEntity<Void> LogoutAccount() throws BadActionException {
-        String email = SecurityUtils.getCurrentUserLogin().isPresent() ? SecurityUtils.getCurrentUserLogin().get() : "";
-        if (email.equals("")) {
-            throw new BadActionException("Something wrong with access token");
-        }
-        // set null value
-        this.userService.saveRefreshToken(null, email);
+    public ResponseEntity<Void> LogoutAccount(
+            @CookieValue(name = "refresh-token", required = false) String refreshToken) {
+        // Thu hồi đúng phiên gắn với cookie này; các thiết bị khác giữ nguyên phiên
+        // của họ. Không cần access token còn hạn nên logout vẫn chạy được khi access
+        // token đã hết hạn.
+        this.refreshTokenService.revoke(refreshToken);
         ResponseCookie removeCookies = ResponseCookie
                 .from("refresh-token", null)
                 .httpOnly(true)

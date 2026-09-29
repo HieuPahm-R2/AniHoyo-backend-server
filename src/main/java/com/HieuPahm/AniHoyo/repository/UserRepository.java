@@ -15,6 +15,4 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
      @Query("SELECT u FROM User u JOIN FETCH u.role r LEFT JOIN FETCH r.permissions WHERE u.email = :email")
      User findByEmailWithPermissions(String email);
-
-     User findByRefreshTokenAndEmail(String token, String email);
 }

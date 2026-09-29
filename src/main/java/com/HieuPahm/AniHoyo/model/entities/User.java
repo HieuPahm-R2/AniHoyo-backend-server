@@ -49,9 +49,6 @@ public class User {
     private String createdBy;
     private String updatedBy;
 
-    @Column(columnDefinition = "MEDIUMTEXT")
-    private String refreshToken;
-
     // db relationship
     @ManyToOne
     @JoinColumn(name = "role_id")

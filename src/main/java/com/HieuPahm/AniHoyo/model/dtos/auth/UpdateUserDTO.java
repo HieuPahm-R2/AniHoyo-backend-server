@@ -14,7 +14,6 @@ public class UpdateUserDTO {
     private long id;
     private String fullName;
     private String email;
-    private String refreshToken;
 
     private Instant updatedTime;
     private RoleOfUser role;
