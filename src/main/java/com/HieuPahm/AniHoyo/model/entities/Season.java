@@ -37,17 +37,24 @@ public class Season {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Column(columnDefinition = "nvarchar(150)")
+    @Column(length = 150)
     private String seasonName;
     private String ordinal;
+    /**
+     * Absolute URLs returned by the object storage (Cloudflare R2 / SeaweedFS) are
+     * routinely longer than 255 characters; a 255-char column turns that into
+     * "Data too long for column ...", i.e. a 500 on a perfectly valid upload.
+     */
+    @Column(length = 1000)
     private String thumb;
+    @Column(length = 1000)
     private String trailer;
     private Long viewCount;
     private Integer releaseYear;
 
     private Instant uploadDate;
 
-    @Column(columnDefinition = "nvarchar(4000)")
+    @Column(length = 4000)
     private String description;
 
     private String createdBy;

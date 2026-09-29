@@ -29,7 +29,7 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "nvarchar(150)")
+    @Column(length = 150)
     private String name;
 
     @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)

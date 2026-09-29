@@ -4,6 +4,7 @@ import java.time.Instant;
 
 import com.HieuPahm.AniHoyo.utils.constant.NotificationEnum;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -33,6 +34,8 @@ public class Notification {
     // @Enumerated(EnumType.STRING)
     private String type;
 
+    /** Built from user data (full name + text), so it can outgrow 255 chars. */
+    @Column(length = 1000)
     private String message;
     private Boolean isRead = false;
 

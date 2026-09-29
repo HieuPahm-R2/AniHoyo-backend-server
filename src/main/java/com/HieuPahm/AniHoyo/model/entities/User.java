@@ -33,6 +33,8 @@ public class User {
     @NotBlank(message = "Password not be blank..")
     private String password;
 
+    /** Avatar URL produced by the image storage (can exceed 255 chars). */
+    @Column(length = 1000)
     private String avatar;
 
     private Instant createdTime;

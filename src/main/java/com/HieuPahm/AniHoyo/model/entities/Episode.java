@@ -21,9 +21,11 @@ public class Episode {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(columnDefinition = "nvarchar(150)")
+    @Column(length = 150)
     private String title;
 
+    /** Storage path/URL of the media file; R2 keys + HLS playlists exceed 255 chars. */
+    @Column(length = 1000)
     private String filePath;
     private String contentType;
 
