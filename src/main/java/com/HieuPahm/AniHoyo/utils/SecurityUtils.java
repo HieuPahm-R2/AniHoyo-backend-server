@@ -1,7 +1,11 @@
 package com.HieuPahm.AniHoyo.utils;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 import java.util.Optional;
 
 import javax.crypto.SecretKey;
@@ -94,6 +98,9 @@ public class SecurityUtils {
         .expiresAt(validity)
         .subject(email)
         .claim("user account", token)
+        // jti: hai lần phát hành trong cùng một giây vẫn ra token khác nhau —
+        // bắt buộc để token_hash trong bảng refresh_tokens là duy nhất.
+        .id(UUID.randomUUID().toString())
         .build();
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
@@ -113,8 +120,34 @@ public class SecurityUtils {
         .expiresAt(validity)
         .subject(emailLogin)
         .claim("user account", data)
+        // jti: hai lần login trong cùng một giây vẫn ra token khác nhau —
+        // bắt buộc để token_hash trong bảng refresh_tokens là duy nhất.
+        .id(UUID.randomUUID().toString())
         .build();
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
+    }
+
+    /**
+     * SHA-256 hex của một refresh token.
+     *
+     * Bảng refresh_tokens chỉ lưu hash nên nếu dữ liệu bị lộ thì cũng không dùng
+     * lại được token; tra cứu vẫn là một phép so khớp trên index unique.
+     */
+    public static String hashToken(String token) {
+        if (token == null) {
+            return null;
+        }
+        try {
+            byte[] hashed = MessageDigest.getInstance("SHA-256").digest(token.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder(hashed.length * 2);
+            for (byte value : hashed) {
+                hex.append(Character.forDigit((value >> 4) & 0xF, 16));
+                hex.append(Character.forDigit(value & 0xF, 16));
+            }
+            return hex.toString();
+        } catch (NoSuchAlgorithmException exception) {
+            throw new IllegalStateException("SHA-256 không khả dụng trên JVM này", exception);
+        }
     }
 }
