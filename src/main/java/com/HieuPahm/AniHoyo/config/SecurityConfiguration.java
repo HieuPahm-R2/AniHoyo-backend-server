@@ -10,6 +10,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.http.HttpMethod;
 
@@ -25,6 +27,28 @@ public class SecurityConfiguration {
         public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
                         throws Exception {
                 return authenticationConfiguration.getAuthenticationManager();
+        }
+
+        /**
+         * /auth/refresh và /auth/logout xác thực bằng cookie `refresh-token`
+         * (httpOnly), không bằng header Authorization. Client vẫn thường gắn access
+         * token đã hết hạn vào request, và BearerTokenAuthenticationFilter trả 401
+         * ngay khi token không decode được — trước cả khi rules phân quyền được xét,
+         * nên permitAll cho /api/v1/auth/** không cứu được request. Bỏ qua bearer
+         * token ở đúng hai path này để request luôn tới được AuthController.
+         *
+         * Lưu ý: KHÔNG áp dụng cho /api/v1/auth/account — endpoint đó cần access
+         * token để biết user hiện tại.
+         */
+        @Bean
+        public BearerTokenResolver bearerTokenResolver() {
+                BearerTokenResolver delegate = new DefaultBearerTokenResolver();
+                return request -> {
+                        String uri = request.getRequestURI();
+                        boolean cookieAuthenticated = "/api/v1/auth/refresh".equals(uri)
+                                        || "/api/v1/auth/logout".equals(uri);
+                        return cookieAuthenticated ? null : delegate.resolve(request);
+                };
         }
 
         @Bean
