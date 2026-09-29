@@ -1,5 +1,7 @@
 package com.HieuPahm.AniHoyo.utils;
 
+import java.util.Map;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -45,13 +47,46 @@ public class FormatRestResponse implements ResponseBodyAdvice<Object> {
 		}
 		// ========= error case=========
 		if (status >= 400) {
-			return arg0;
+			// Already built by GlobalException (or by AuthEntryPointConfig) — keep it.
+			if (arg0 instanceof RestResponse) {
+				return arg0;
+			}
+			// Otherwise this is Spring's own error body (BasicErrorController,
+			// filter-chain errors, container errors...). Re-shape it so clients always
+			// receive the same envelope. `data` stays null on purpose: call sites treat
+			// a truthy `data` as success, and an error must never look like one.
+			return wrapErrorBody(arg0, status, path);
 		} else {
 			// ====== success case =======
 			res.setData(arg0);
 			MessageApi message = arg1.getMethodAnnotation(MessageApi.class);
 			res.setMessage(message != null ? message.value() : "API HAS BEEN SUCCESSFULLY CALLED");
 		}
+		return res;
+	}
+
+	private RestResponse<Object> wrapErrorBody(Object body, int status, String path) {
+		RestResponse<Object> res = new RestResponse<>();
+		res.setStatusCode(status);
+
+		String error = null;
+		Object message = null;
+		if (body instanceof Map<?, ?> map) {
+			Object rawError = map.get("error");
+			Object rawMessage = map.get("message");
+			error = rawError != null ? String.valueOf(rawError) : null;
+			message = rawMessage;
+			if (message == null && map.get("detail") != null) {
+				message = map.get("detail");
+			}
+		} else if (body != null && !(body instanceof RestResponse)) {
+			error = String.valueOf(body);
+		}
+
+		String messageText = message != null ? String.valueOf(message) : "Yêu cầu thất bại (HTTP " + status + ")";
+		res.setMessage(messageText);
+		res.setError(error != null ? error : messageText);
+		res.setPath(path);
 		return res;
 	}
 
